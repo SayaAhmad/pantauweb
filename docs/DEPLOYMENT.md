@@ -377,4 +377,4 @@ Lalu masuk ke aplikasi dan pastikan:
 
 ## 13. Catatan kompatibilitas basis data
 
-Rilis ini diuji penuh pada SQLite. Query laporan memakai agregasi SQL dan ekspresi tanggal khusus per driver (`sqlite`, `mysql`, `pgsql`), tetapi uji migrasi dan query pada MySQL/PostgreSQL belum dijalankan di lingkungan pengembangan ini (lihat T-610 pada tracker). Sebelum memakai MySQL atau PostgreSQL di produksi, jalankan migrasi, seed, dan seluruh halaman pada salinan staging lebih dulu.
+Rilis ini diuji penuh pada SQLite, MySQL 8.4.6, dan PostgreSQL 16.9. Query laporan memakai agregasi SQL dan ekspresi tanggal khusus per driver (`sqlite`, `mysql`, `pgsql`). Meski begitu, tetap jalankan migrasi, seed, dan seluruh halaman pada salinan staging sebelum produksi, terutama bila memakai versi atau konfigurasi server yang berbeda.

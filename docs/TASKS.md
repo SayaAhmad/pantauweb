@@ -31,10 +31,10 @@ Dokumen ini adalah papan tugas (task list tracker) untuk implementasi dan pengem
 | M3 | Mesin pemeriksaan | 9 | 9 | ✅ selesai |
 | M4 | Penjadwalan & operasional | 8 | 8 | ✅ selesai |
 | M5 | Halaman & antarmuka | 13 | 13 | ✅ selesai |
-| M6 | QA & rilis MVP | 14 | 13 | 🟡 1 terblokir |
+| M6 | QA & rilis MVP | 14 | 14 | ✅ selesai |
 | M7 | Fase 2 (metrik agent) | 6 | 0 | ⬜ rencana |
 | M8 | Fase 3 (notifikasi & skala) | 5 | 0 | ⬜ rencana |
-| **Total MVP (M0–M6)** | | **63** | **62** | **98%** |
+| **Total MVP (M0–M6)** | | **63** | **63** | **100%** |
 
 Terakhir diperbarui: **11 Nov 2026**
 
@@ -118,7 +118,7 @@ Terakhir diperbarui: **11 Nov 2026**
 - [x] **T-607** Uji API agent: token valid → 201, token salah → 401, metrik tersimpan.
 - [x] **T-608** Build aset produksi (`npm run build`) dan pastikan manifest terpakai.
 - [x] **T-609** Lengkapi `README.md` + `.env.example` (admin, retensi, timezone, email).
-- [!] **T-610** Uji migrasi & query di MySQL dan PostgreSQL. Terblokir: lingkungan ini tidak memiliki server MySQL/PostgreSQL, Docker, maupun klien `mysql`/`psql`. Query laporan sudah memakai ekspresi tanggal per driver, tetapi belum dieksekusi di luar SQLite.
+- [x] **T-610** Uji migrasi & query di MySQL dan PostgreSQL. MySQL 8.4.6 dan PostgreSQL 16.9 portable dijalankan pada port terpisah. `migrate:fresh` dan seluruh suite lulus di kedua driver: 19 test, 92 assertion per driver. Query laporan, rollup, insiden, dan CSV yang memakai ekspresi tanggal per driver ikut tervalidasi.
 - [x] **T-611** Uji UI di Chrome, Firefox, Safari + viewport mobile 375px. Playwright 1.65.0: Chromium/Edge, Firefox, dan WebKit (mewakili Safari; Safari asli tidak tersedia di Windows) lulus 6 halaman × 375px dan 1440px, Edge juga 768px. Hasil: HTTP 200, 0 scroll horizontal, 0 kontrol < 44px, 0 input tanpa label, 0 error konsol. Menu mobile terbuka dan tertutup dengan Escape; Tab pertama menuju "Lewati ke konten". Bukti di `storage/app/ui-cross.json`, `storage/app/ui-result.json`, dan `storage/app/ui-evidence/`.
 - [x] **T-612** Audit aksesibilitas: kontras, fokus keyboard, label form, status tidak hanya warna. Skip link + `main#konten`, fokus global `:focus-visible` 2px teal-700, target sentuh minimum 44px, `aria-current`, `aria-label` pada filter dan aksi ikon, `role="status"`/`role="alert"`, `scope="col"` pada semua tabel, `prefers-reduced-motion`, dan perbaikan kontras teks. Animasi denyut dihapus. Verifikasi otomatis: 0 kontrol < 44px dan 0 input tanpa label di 3 mesin browser. Audit kontras Playwright pada 6 halaman x 2 viewport (375px, 1440px) menemukan 0 pelanggaran rasio WCAG AA; fokus keyboard terukur `outline` 2px solid teal-700 (`rgb(15, 118, 110)`). Bukti di `storage/app/contrast-audit.json`.
 - [x] **T-613** Uji beban: 50 monitor x 30 hari data mentah, target dashboard < 1,5 detik. Benchmark SQLite 66 MB (50 monitor, 432.000 cek, 1.500 rollup, 122 insiden) dengan `memory_limit=64M`: dashboard 140–149 ms, `/monitors` 129–138 ms, detail monitor 577–599 ms, `/reports` 395–411 ms, `/reports` rentang 90 hari 1.248–1.263 ms. Sebelum perbaikan, dashboard dan laporan gagal dengan OOM 128 MB. Dashboard, daftar monitor, dan laporan kini memakai agregasi SQL; laporan menggabungkan data mentah dan rollup.
@@ -158,18 +158,19 @@ Prasyarat: M6 selesai, khususnya T-610 dan T-614.
 | 11 Nov 2026 | T-612 | Audit aksesibilitas dan perbaikan kontras, fokus, target 44px, label, dan status. Screenshot 375px/1440px tersimpan di `storage/app/ui-evidence/`. |
 | 11 Nov 2026 | T-613 | Benchmark 50 monitor x 30 hari (432.000 cek). OOM 128 MB diperbaiki dengan agregasi SQL. Semua halaman < 1,5 detik pada `memory_limit=64M`. Suite menjadi 19 test, 92 assertion. |
 | 11 Nov 2026 | T-614 | Panduan produksi di `docs/DEPLOYMENT.md`: nginx/PHP-FPM, cron, supervisor/systemd, backup, upgrade, keamanan. |
-| 11 Nov 2026 | T-610 | Tetap terblokir: tidak ada MySQL/PostgreSQL, Docker, atau klien basis data di lingkungan ini. |
+| 11 Nov 2026 | T-610 | MySQL 8.4.6 dan PostgreSQL 16.9 portable: migrasi dan suite 19 test / 92 assertion lulus di kedua driver. |
 
 ---
 
 ### Delivery Gate M6
 
-Status: **PASS** untuk tugas yang dapat dijalankan, dengan T-610 terblokir lingkungan.
+Status: **PASS** untuk seluruh tugas MVP.
 
 | Kriteria | Status | Bukti |
 |---|---|---|
 | Perilaku sesuai kriteria penerimaan PRD | PASS | Seluruh halaman terautentikasi HTTP 200; laporan dan CSV mengikuti filter; rollup dipakai untuk rentang lebih dari retensi. |
 | `php artisan test` hijau | PASS | 19 test, 92 assertion lulus. |
+| Kompatibilitas database | PASS | MySQL 8.4.6 dan PostgreSQL 16.9: migrasi dan suite 19 test / 92 assertion lulus di kedua driver. |
 | Build aset produksi | PASS | `npm run build` menghasilkan manifest dan aset `public/build`. |
 | UI lintas browser dan mobile | PASS | Chromium/Edge, Firefox, WebKit pada 375px dan 1440px; 0 error, 0 overflow, 0 kontrol kecil. |
 | Aksesibilitas WCAG AA | PASS | Audit kontras 6 halaman x 375px/1440px: 0 pelanggaran; fokus 2px teal-700; target 44px; label form lengkap; status memakai teks selain warna; reduced motion. |
