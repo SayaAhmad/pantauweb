@@ -27,7 +27,7 @@
             @endif
         </form>
 
-        <p class="text-xs text-slate-500">Diperbarui {{ now()->timezone(config('monitoring.display_timezone'))->translatedFormat('d M Y H:i') }}</p>
+        <p class="text-xs text-slate-600">Diperbarui {{ now()->timezone(config('monitoring.display_timezone'))->translatedFormat('d M Y H:i') }}</p>
     </div>
 
     @if ($openIncidents->isNotEmpty())

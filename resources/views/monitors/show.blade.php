@@ -21,7 +21,7 @@
     <div class="mb-5 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div class="min-w-0">
             <div class="flex flex-wrap items-center gap-2">
-                <a href="{{ route('monitors.index') }}" class="text-xs font-semibold text-slate-500 hover:text-slate-800 sm:hidden">← Monitor</a>
+                <a href="{{ route('monitors.index') }}" class="text-xs font-semibold text-slate-600 hover:text-slate-800 sm:hidden">← Monitor</a>
                 <x-type-badge :type="$monitor->type" />
                 <x-status-badge :status="$monitor->status" :pending="$pending" />
                 @unless ($monitor->is_active)
@@ -31,7 +31,7 @@
 
             <h2 class="mt-2 text-2xl font-extrabold tracking-tight text-slate-900">{{ $monitor->name }}</h2>
 
-            <p class="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-slate-500">
+            <p class="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-slate-600">
                 @if ($monitor->type !== \App\Enums\MonitorType::Port)
                     <a href="{{ $monitor->url }}" target="_blank" rel="noopener noreferrer" class="break-all font-mono text-teal-700 hover:text-teal-800 hover:underline">{{ $monitor->url }}</a>
                 @else
