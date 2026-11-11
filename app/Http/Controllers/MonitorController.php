@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Enums\MonitorStatus;
 use App\Http\Requests\MonitorRequest;
 use App\Jobs\CheckMonitorJob;
-use App\Models\CheckResult;
 use App\Models\Incident;
 use App\Models\Monitor;
 use App\Models\Server;
@@ -38,12 +37,8 @@ class MonitorController extends Controller
             ->orderBy('name')
             ->get();
 
-        $results = CheckResult::query()
-            ->whereIn('monitor_id', $monitors->pluck('id'))
-            ->where('checked_at', '>=', now()->subDay())
-            ->get(['monitor_id', 'status', 'response_time_ms', 'checked_at']);
-
-        $grouped = $results->groupBy('monitor_id');
+        $summaries = Metrics::summaries($monitors->pluck('id'), now()->subDay());
+        $emptySummary = ['total' => 0, 'up' => 0, 'down' => 0, 'uptime' => null, 'avg_ms' => null, 'p95_ms' => null, 'max_ms' => null];
 
         $openIncidents = Incident::query()
             ->whereNull('resolved_at')
@@ -51,8 +46,8 @@ class MonitorController extends Controller
             ->get()
             ->keyBy('monitor_id');
 
-        $monitors->each(function (Monitor $monitor) use ($grouped, $openIncidents): void {
-            $monitor->uptime24 = Metrics::summary($grouped->get($monitor->id, collect()));
+        $monitors->each(function (Monitor $monitor) use ($summaries, $emptySummary, $openIncidents): void {
+            $monitor->uptime24 = $summaries->get($monitor->id, $emptySummary);
             $monitor->open_incident = $openIncidents->get($monitor->id);
         });
 

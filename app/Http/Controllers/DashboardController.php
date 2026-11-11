@@ -3,12 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Enums\MonitorStatus;
-use App\Models\CheckResult;
 use App\Models\Incident;
 use App\Models\Monitor;
 use App\Models\Server;
 use App\Monitoring\Metrics;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
 class DashboardController extends Controller
@@ -34,19 +34,16 @@ class DashboardController extends Controller
             ->values();
 
         $since = now()->subDay();
+        $monitorIds = $monitors->pluck('id');
+        $emptySummary = ['total' => 0, 'up' => 0, 'down' => 0, 'uptime' => null, 'avg_ms' => null, 'p95_ms' => null, 'max_ms' => null];
 
-        $results = CheckResult::query()
-            ->whereIn('monitor_id', $monitors->pluck('id'))
-            ->where('checked_at', '>=', $since)
-            ->get(['monitor_id', 'status', 'response_time_ms', 'checked_at']);
+        $summaries = Metrics::summaries($monitorIds, $since);
 
-        $grouped = $results->groupBy('monitor_id');
-
-        $monitors->each(function (Monitor $monitor) use ($grouped): void {
-            $monitor->uptime24 = Metrics::summary($grouped->get($monitor->id, collect()));
+        $monitors->each(function (Monitor $monitor) use ($summaries, $emptySummary): void {
+            $monitor->uptime24 = $summaries->get($monitor->id, $emptySummary);
         });
 
-        $summary24 = Metrics::summary($results);
+        $summary24 = Metrics::overallSummary($monitorIds, $since);
 
         $counts = [
             'total' => $monitors->count(),
@@ -84,7 +81,17 @@ class DashboardController extends Controller
             'recentIncidents' => $recentIncidents,
             'sslAlerts' => $sslAlerts,
             'servers' => Server::query()->orderBy('name')->get(),
-            'chart' => Metrics::series($results, $since, now(), 24),
+            'chart' => Metrics::seriesFromRows(
+                DB::table('check_results')
+                    ->select('checked_at', 'status', 'response_time_ms')
+                    ->whereIn('monitor_id', $monitorIds)
+                    ->where('checked_at', '>=', $since)
+                    ->orderBy('checked_at')
+                    ->cursor(),
+                $since,
+                now(),
+                24,
+            ),
             'type' => $type,
             'serverId' => $serverId,
         ]);

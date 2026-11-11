@@ -2,13 +2,13 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\CheckResult;
-use App\Models\Incident;
 use App\Models\Monitor;
 use App\Models\Server;
 use App\Monitoring\Metrics;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
@@ -68,9 +68,9 @@ class ReportController extends Controller
      * @return array{
      *     from: Carbon,
      *     to: Carbon,
-     *     servers: \Illuminate\Support\Collection,
-     *     monitorOptions: \Illuminate\Support\Collection,
-     *     rows: \Illuminate\Support\Collection,
+     *     servers: Collection,
+     *     monitorOptions: Collection,
+     *     rows: Collection,
      *     overall: array{total: int, up: int, down: int, uptime: float|null, avg_ms: int|null, p95_ms: int|null, max_ms: int|null},
      *     incidentCount: int,
      *     downtimeSeconds: int,
@@ -113,39 +113,51 @@ class ReportController extends Controller
             ->orderBy('name')
             ->get();
 
-        $monitorIds = $monitors->pluck('id');
+        $monitorIds = $monitors->pluck('id')->all();
 
-        $results = CheckResult::query()
-            ->whereIn('monitor_id', $monitorIds)
-            ->whereBetween('checked_at', [$from, $to])
-            ->get(['monitor_id', 'status', 'response_time_ms', 'checked_at']);
+        $retentionStart = now()->subDays((int) config('monitoring.retention_days'))->startOfDay();
+        $rawFrom = $from->greaterThan($retentionStart) ? $from->copy() : $retentionStart->copy();
 
-        $grouped = $results->groupBy('monitor_id');
+        if ($rawFrom->greaterThan($to)) {
+            $rawFrom = $to->copy();
+        }
 
-        $incidents = Incident::query()
+        $range = Metrics::rangeReport($monitorIds, $from, $to, $rawFrom);
+
+        $incidentCounts = DB::table('incidents')
+            ->selectRaw('monitor_id, COUNT(*) as incident_count, SUM(COALESCE(duration_seconds, 0)) as resolved_downtime')
             ->whereIn('monitor_id', $monitorIds)
             ->whereBetween('started_at', [$from, $to])
-            ->get(['monitor_id', 'started_at', 'resolved_at', 'duration_seconds']);
+            ->groupBy('monitor_id')
+            ->get()
+            ->keyBy('monitor_id');
 
-        $incidentsByMonitor = $incidents->groupBy('monitor_id');
+        $openDowntime = DB::table('incidents')
+            ->whereIn('monitor_id', $monitorIds)
+            ->whereNull('resolved_at')
+            ->whereBetween('started_at', [$from, $to])
+            ->get(['monitor_id', 'started_at'])
+            ->groupBy('monitor_id')
+            ->map(fn ($rows) => $rows->sum(fn ($row) => (int) Carbon::parse($row->started_at)->diffInSeconds(now(), true)));
 
-        $rows = $monitors->map(function (Monitor $monitor) use ($grouped, $incidentsByMonitor): array {
-            $summary = Metrics::summary($grouped->get($monitor->id, collect()));
-            $monitorIncidents = $incidentsByMonitor->get($monitor->id, collect());
+        $emptySummary = [
+            'total' => 0,
+            'up' => 0,
+            'down' => 0,
+            'uptime' => null,
+            'avg_ms' => null,
+            'p95_ms' => null,
+            'max_ms' => null,
+        ];
 
-            $downtime = $monitorIncidents->sum(function (Incident $incident): int {
-                if ($incident->resolved_at === null) {
-                    return (int) $incident->started_at->diffInSeconds(now(), true);
-                }
-
-                return (int) ($incident->duration_seconds ?? 0);
-            });
+        $rows = $monitors->map(function (Monitor $monitor) use ($range, $incidentCounts, $openDowntime, $emptySummary): array {
+            $incidentRow = $incidentCounts->get($monitor->id);
 
             return [
                 'monitor' => $monitor,
-                'summary' => $summary,
-                'incident_count' => $monitorIncidents->count(),
-                'downtime_seconds' => $downtime,
+                'summary' => $range['rows']->get($monitor->id, $emptySummary),
+                'incident_count' => (int) ($incidentRow->incident_count ?? 0),
+                'downtime_seconds' => (int) ($incidentRow->resolved_downtime ?? 0) + (int) $openDowntime->get($monitor->id, 0),
             ];
         });
 
@@ -162,10 +174,10 @@ class ReportController extends Controller
             'servers' => $serverOptions,
             'monitorOptions' => $monitorOptions,
             'rows' => $rows,
-            'overall' => Metrics::summary($results),
-            'incidentCount' => $incidents->count(),
+            'overall' => $range['overall'],
+            'incidentCount' => (int) $incidentCounts->sum('incident_count'),
             'downtimeSeconds' => (int) $rows->sum('downtime_seconds'),
-            'chart' => Metrics::dailySeries($results, $from, $to),
+            'chart' => $range['chart'],
             'filters' => [
                 'server' => $serverId,
                 'monitor' => $monitorId,
