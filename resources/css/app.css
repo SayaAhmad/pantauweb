@@ -18,6 +18,55 @@
     body {
         @apply bg-slate-100 text-slate-900 antialiased;
     }
+
+    a[href],
+    button,
+    select,
+    summary,
+    label[for],
+    input[type='checkbox'],
+    input[type='radio'] {
+        cursor: pointer;
+    }
+
+    :disabled,
+    [aria-disabled='true'] {
+        cursor: not-allowed;
+    }
+
+    :focus-visible {
+        outline: 2px solid #0f766e;
+        outline-offset: 2px;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+            animation-duration: 0.01ms !important;
+            animation-iteration-count: 1 !important;
+            transition-duration: 0.01ms !important;
+            scroll-behavior: auto !important;
+        }
+    }
+}
+
+.skip-link {
+    position: absolute;
+    top: -3rem;
+    left: 1rem;
+    z-index: 100;
+    border-radius: 0.5rem;
+    background: #0f766e;
+    padding: 0.625rem 1rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #fff;
+    transition: top 120ms ease-out;
+}
+
+.skip-link:focus {
+    top: 1rem;
 }
 
 @layer components {
@@ -34,7 +83,7 @@
     }
 
     .input {
-        @apply w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20;
+        @apply min-h-11 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm outline-none transition placeholder:text-slate-500 focus:border-teal-700 focus:ring-2 focus:ring-teal-600;
     }
 
     .btn,
@@ -42,7 +91,7 @@
     .btn-secondary,
     .btn-danger,
     .btn-ghost {
-        @apply inline-flex items-center justify-center gap-2 rounded-lg px-3.5 py-2 text-sm font-semibold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60;
+        @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-lg px-3.5 py-2 text-sm font-semibold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60;
     }
 
     .btn-primary {

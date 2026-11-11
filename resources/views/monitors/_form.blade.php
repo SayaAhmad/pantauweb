@@ -7,7 +7,7 @@
     <div class="card p-5 sm:p-6">
         <div class="mb-5 flex items-start gap-3">
             <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-teal-50 text-teal-700 ring-1 ring-inset ring-teal-600/10">
-                <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7">
+                <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18Zm0 0a8.949 8.949 0 0 0 4.951-1.488A3.987 3.987 0 0 0 13 16h-2a3.987 3.987 0 0 0-3.951 3.512A8.949 8.949 0 0 0 12 21Zm0-9a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" />
                 </svg>
             </span>
@@ -39,7 +39,7 @@
                 </div>
 
                 <div>
-                    <label for="server_id" class="label">Server <span class="font-normal text-slate-400">(opsional)</span></label>
+                    <label for="server_id" class="label">Server <span class="font-normal text-slate-500">(opsional)</span></label>
                     <select id="server_id" name="server_id" class="input">
                         <option value="">Tanpa server</option>
                         @foreach ($servers as $server)
@@ -76,7 +76,7 @@
                 </div>
 
                 <div>
-                    <label for="expected_keyword" class="label">Kata kunci pada respons <span class="font-normal text-slate-400">(opsional)</span></label>
+                    <label for="expected_keyword" class="label">Kata kunci pada respons <span class="font-normal text-slate-500">(opsional)</span></label>
                     <input id="expected_keyword" name="expected_keyword" type="text" value="{{ old('expected_keyword', $monitor->expected_keyword) }}" class="input" placeholder="Contoh: OK atau &quot;status&quot;:&quot;healthy&quot;">
                     <p class="hint">Pemeriksaan dinyatakan gagal bila kata kunci tidak ditemukan. Tidak berlaku untuk metode HEAD.</p>
                     <x-input-error for="expected_keyword" />
@@ -97,7 +97,7 @@
             </div>
 
             <div>
-                <label for="notes" class="label">Catatan <span class="font-normal text-slate-400">(opsional)</span></label>
+                <label for="notes" class="label">Catatan <span class="font-normal text-slate-500">(opsional)</span></label>
                 <textarea id="notes" name="notes" rows="2" class="input" placeholder="Konteks tambahan, penanggung jawab, atau prosedur saat gangguan.">{{ old('notes', $monitor->notes) }}</textarea>
                 <x-input-error for="notes" />
             </div>
@@ -107,7 +107,7 @@
     <div class="card p-5 sm:p-6">
         <div class="mb-5 flex items-start gap-3">
             <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-600 ring-1 ring-inset ring-slate-400/10">
-                <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7">
+                <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
                 </svg>
             </span>
@@ -123,7 +123,7 @@
                     <label for="interval_seconds" class="label">Interval pemeriksaan</label>
                     <div class="relative">
                         <input id="interval_seconds" name="interval_seconds" type="number" min="60" max="86400" step="60" value="{{ old('interval_seconds', $monitor->interval_seconds ?? 300) }}" required class="input pr-14">
-                        <span class="pointer-events-none absolute inset-y-0 right-3 flex items-center text-xs font-medium text-slate-400">detik</span>
+                        <span class="pointer-events-none absolute inset-y-0 right-3 flex items-center text-xs font-medium text-slate-500">detik</span>
                     </div>
                     <p class="hint">Minimal 60 detik. Contoh: 300 = tiap 5 menit.</p>
                     <x-input-error for="interval_seconds" />
@@ -133,7 +133,7 @@
                     <label for="timeout_seconds" class="label">Batas waktu pemeriksaan</label>
                     <div class="relative">
                         <input id="timeout_seconds" name="timeout_seconds" type="number" min="1" max="60" value="{{ old('timeout_seconds', $monitor->timeout_seconds ?? 10) }}" required class="input pr-14">
-                        <span class="pointer-events-none absolute inset-y-0 right-3 flex items-center text-xs font-medium text-slate-400">detik</span>
+                        <span class="pointer-events-none absolute inset-y-0 right-3 flex items-center text-xs font-medium text-slate-500">detik</span>
                     </div>
                     <p class="hint">Maksimal 60 detik.</p>
                     <x-input-error for="timeout_seconds" />
@@ -159,7 +159,7 @@
             <div class="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
                 <input type="hidden" name="is_active" value="0">
                 <label class="flex cursor-pointer items-start gap-3">
-                    <input type="checkbox" name="is_active" value="1" class="mt-0.5 h-4 w-4 rounded border-slate-300 text-teal-600 focus:ring-teal-500/30" @checked($isActiveChecked)>
+                    <input type="checkbox" name="is_active" value="1" class="mt-0.5 h-4 w-4 rounded border-slate-300 text-teal-700 focus:ring-teal-600" @checked($isActiveChecked)>
                     <span>
                         <span class="block text-sm font-semibold text-slate-800">Monitor aktif</span>
                         <span class="block text-xs text-slate-500">Monitor nonaktif berhenti dijadwalkan tetapi riwayatnya tetap tersimpan.</span>
@@ -172,11 +172,11 @@
 
     <div class="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
         <a href="{{ $monitor->exists ? route('monitors.show', $monitor) : route('monitors.index') }}" class="btn-secondary">Batal</a>
-        <button type="submit" class="btn-primary">
-            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <button type="submit" :disabled="saving" class="btn-primary disabled:cursor-not-allowed disabled:opacity-60">
+            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
             </svg>
-            {{ $monitor->exists ? 'Simpan perubahan' : 'Buat monitor' }}
+            <span x-text="saving ? 'Menyimpan…' : '{{ $monitor->exists ? 'Simpan perubahan' : 'Buat monitor' }}'">{{ $monitor->exists ? 'Simpan perubahan' : 'Buat monitor' }}</span>
         </button>
     </div>
 </div>

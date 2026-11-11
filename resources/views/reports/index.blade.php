@@ -8,7 +8,7 @@
 
     $uptimeColor = function (?float $value): string {
         if ($value === null) {
-            return 'text-slate-400';
+            return 'text-slate-600';
         }
 
         return $value >= 99.5 ? 'text-emerald-700' : ($value >= 95 ? 'text-amber-700' : 'text-rose-700');
@@ -17,14 +17,14 @@
 
 <x-app-layout title="Laporan" subtitle="Uptime, waktu respons, dan insiden per monitor">
     <x-slot:actions>
-        <button type="button" class="btn-secondary no-print" onclick="window.print()">
-            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+        <button type="button" class="btn-secondary no-print" onclick="window.print()" aria-label="Cetak laporan">
+            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M6.72 13.829c-.24.03-.48.062-.72.096m.72-.096a42.415 42.415 0 0 1 10.56 0m-10.56 0L6.34 18m10.94-4.171c.24.03.48.062.72.096m-.72-.096L17.66 18m0 0 .229 2.523a1.125 1.125 0 0 1-1.12 1.227H7.231c-.662 0-1.18-.568-1.12-1.227L6.34 18m11.318 0h1.091A2.25 2.25 0 0 0 21 15.75V9.456c0-1.081-.768-2.015-1.837-2.175a48.055 48.055 0 0 0-1.913-.247M6.34 18H5.25A2.25 2.25 0 0 1 3 15.75V9.456c0-1.081.768-2.015 1.837-2.175a48.041 48.041 0 0 1 1.913-.247m10.5 0a48.536 48.536 0 0 0-10.5 0m10.5 0V3.375c0-.621-.504-1.125-1.125-1.125h-8.25c-.621 0-1.125.504-1.125 1.125v3.659M18 10.5h.008v.008H18V10.5Z" />
             </svg>
             <span class="hidden sm:inline">Cetak</span>
         </button>
-        <a href="{{ route('reports.export', $exportQuery) }}" class="btn-primary">
-            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+        <a href="{{ route('reports.export', $exportQuery) }}" class="btn-primary" aria-label="Ekspor laporan sebagai CSV">
+            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" />
             </svg>
             <span class="hidden sm:inline">Ekspor CSV</span>
@@ -99,7 +99,7 @@
                 <span class="badge bg-emerald-50 text-emerald-700 ring-emerald-600/20">%</span>
             </div>
             <div class="mt-4 h-56">
-                <canvas id="reportUptimeChart"></canvas>
+                <canvas id="reportUptimeChart" role="img" aria-label="Grafik uptime harian dari {{ \App\Support\Format::date($from) }} sampai {{ \App\Support\Format::date($to) }}"></canvas>
             </div>
         </div>
 
@@ -112,7 +112,7 @@
                 <span class="badge bg-teal-50 text-teal-700 ring-teal-600/20">ms</span>
             </div>
             <div class="mt-4 h-56">
-                <canvas id="reportResponseChart"></canvas>
+                <canvas id="reportResponseChart" role="img" aria-label="Grafik waktu respons rata-rata harian dari pemeriksaan berhasil"></canvas>
             </div>
         </div>
     </div>
@@ -132,16 +132,16 @@
                 <table class="min-w-full divide-y divide-slate-200 text-sm">
                     <thead class="bg-slate-50/70">
                         <tr class="text-left text-[11px] font-semibold uppercase tracking-wide text-slate-500">
-                            <th class="px-4 py-3 sm:px-5">Monitor</th>
-                            <th class="px-3 py-3">Jenis</th>
-                            <th class="px-3 py-3">Server</th>
-                            <th class="px-3 py-3 text-right">Cek</th>
-                            <th class="px-3 py-3 text-right">Uptime</th>
-                            <th class="px-3 py-3 text-right">Rata-rata</th>
-                            <th class="px-3 py-3 text-right">p95</th>
-                            <th class="px-3 py-3 text-right">Maks</th>
-                            <th class="px-3 py-3 text-right">Insiden</th>
-                            <th class="px-4 py-3 text-right">Downtime</th>
+                            <th scope="col" class="px-4 py-3 sm:px-5">Monitor</th>
+                            <th scope="col" class="px-3 py-3">Jenis</th>
+                            <th scope="col" class="px-3 py-3">Server</th>
+                            <th scope="col" class="px-3 py-3 text-right">Cek</th>
+                            <th scope="col" class="px-3 py-3 text-right">Uptime</th>
+                            <th scope="col" class="px-3 py-3 text-right">Rata-rata</th>
+                            <th scope="col" class="px-3 py-3 text-right">p95</th>
+                            <th scope="col" class="px-3 py-3 text-right">Maks</th>
+                            <th scope="col" class="px-3 py-3 text-right">Insiden</th>
+                            <th scope="col" class="px-4 py-3 text-right">Downtime</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-100">
@@ -179,7 +179,7 @@
         @endif
     </div>
 
-    <p class="mt-3 no-print text-[11px] text-slate-400">
+    <p class="mt-3 no-print text-[11px] text-slate-600">
         Uptime dihitung dari jumlah pemeriksaan berhasil dibagi total pemeriksaan pada rentang. Waktu respons hanya dari pemeriksaan berhasil.
     </p>
 

@@ -51,7 +51,8 @@
     <link href="https://fonts.bunny.net/css?family=plus-jakarta-sans:400,500,600,700,800" rel="stylesheet">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body class="h-full" x-data="{ sidebarOpen: false }">
+<body class="h-full" x-data="{ sidebarOpen: false }" @keydown.escape.window="sidebarOpen = false">
+    <a href="#konten" class="skip-link">Lewati ke konten</a>
     <div class="min-h-full">
         <div
             class="fixed inset-0 z-40 bg-slate-950/60 backdrop-blur-sm lg:hidden"
@@ -63,7 +64,7 @@
 
         <aside
             class="fixed inset-y-0 left-0 z-50 flex w-64 flex-col bg-slate-950 text-slate-300 transition-transform duration-200 lg:translate-x-0"
-            :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'"
+            :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full invisible lg:visible'"
             x-cloak
         >
             <div class="flex h-16 items-center justify-between px-5">
@@ -75,27 +76,28 @@
                     </span>
                     <span>
                         <span class="block text-base font-extrabold tracking-tight text-white">Pantau</span>
-                        <span class="block text-[11px] font-medium uppercase tracking-widest text-slate-500">Monitoring</span>
+                        <span class="block text-[11px] font-medium uppercase tracking-widest text-slate-400">Monitoring</span>
                     </span>
                 </a>
-                <button type="button" class="rounded-lg p-1.5 text-slate-400 hover:bg-slate-800 hover:text-white lg:hidden" @click="sidebarOpen = false">
+                <button type="button" class="flex h-11 w-11 items-center justify-center rounded-lg text-slate-400 hover:bg-slate-800 hover:text-white lg:hidden" @click="sidebarOpen = false">
                     <span class="sr-only">Tutup menu</span>
-                    <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                    <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
                     </svg>
                 </button>
             </div>
 
-            <nav class="mt-2 flex-1 space-y-1 overflow-y-auto px-3">
+            <nav class="mt-2 flex-1 space-y-1 overflow-y-auto px-3" aria-label="Navigasi utama">
                 @foreach ($navigation as $item)
                     @php
                         $active = request()->routeIs($item['pattern']);
                     @endphp
                     <a
                         href="{{ route($item['route']) }}"
-                        class="group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition {{ $active ? 'bg-teal-500/10 text-white ring-1 ring-inset ring-teal-400/20' : 'text-slate-400 hover:bg-slate-900 hover:text-white' }}"
+                        @if ($active) aria-current="page" @endif
+                        class="group flex min-h-11 items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition {{ $active ? 'bg-teal-500/10 text-white ring-1 ring-inset ring-teal-400/20' : 'text-slate-400 hover:bg-slate-900 hover:text-white' }}"
                     >
-                        <span class="{{ $active ? 'text-teal-400' : 'text-slate-500 group-hover:text-slate-300' }}">
+                        <span class="{{ $active ? 'text-teal-400' : 'text-slate-400 group-hover:text-slate-300' }}">
                             @switch($item['icon'])
                                 @case('home')
                                     <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7">
@@ -126,7 +128,7 @@
                         </span>
                         <span class="flex-1">{{ $item['label'] }}</span>
                         @if ($item['label'] === 'Insiden' && $openIncidents > 0)
-                            <span class="rounded-full bg-rose-500 px-1.5 py-0.5 text-[10px] font-bold text-white">{{ $openIncidents }}</span>
+                            <span class="rounded-full bg-rose-600 px-1.5 py-0.5 text-[10px] font-bold text-white">{{ $openIncidents }}</span>
                         @endif
                     </a>
                 @endforeach
@@ -140,29 +142,29 @@
                         </span>
                         <div class="min-w-0 flex-1">
                             <p class="truncate text-xs font-semibold text-white">{{ auth()->user()?->name }}</p>
-                            <p class="truncate text-[11px] text-slate-500">{{ auth()->user()?->email }}</p>
+                            <p class="truncate text-[11px] text-slate-400">{{ auth()->user()?->email }}</p>
                         </div>
                     </div>
                     <form method="POST" action="{{ route('logout') }}" class="mt-3">
                         @csrf
-                        <button type="submit" class="flex w-full items-center justify-center gap-1.5 rounded-lg bg-slate-800 px-2 py-1.5 text-xs font-semibold text-slate-300 transition hover:bg-slate-700 hover:text-white">
-                            <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                        <button type="submit" class="flex min-h-11 w-full items-center justify-center gap-1.5 rounded-lg bg-slate-800 px-2 py-1.5 text-xs font-semibold text-slate-300 transition hover:bg-slate-700 hover:text-white">
+                            <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15M12 9l-3 3m0 0 3 3m-3-3h12.75" />
                             </svg>
                             Keluar
                         </button>
                     </form>
                 </div>
-                <p class="mt-2 px-1 text-[10px] text-slate-600">Pantau MVP · {{ config('monitoring.display_timezone') }}</p>
+                <p class="mt-2 px-1 text-[10px] text-slate-400">Pantau MVP · {{ config('monitoring.display_timezone') }}</p>
             </div>
         </aside>
 
         <div class="lg:pl-64">
             <header class="sticky top-0 z-30 border-b border-slate-200 bg-white/90 backdrop-blur">
                 <div class="flex h-16 items-center gap-3 px-4 sm:px-6 lg:px-8">
-                    <button type="button" class="rounded-lg p-2 text-slate-500 hover:bg-slate-100 hover:text-slate-900 lg:hidden" @click="sidebarOpen = true">
+                    <button type="button" class="flex h-11 w-11 items-center justify-center rounded-lg text-slate-600 hover:bg-slate-100 hover:text-slate-900 lg:hidden" @click="sidebarOpen = true">
                         <span class="sr-only">Buka menu</span>
-                        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5M3.75 17.25h16.5" />
                         </svg>
                     </button>
@@ -181,7 +183,7 @@
                     >
                         <span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
                         <span x-text="now.toLocaleString('id-ID', { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })"></span>
-                        <span class="text-slate-400">WIB</span>
+                        <span class="text-slate-500">WIB</span>
                     </div>
 
                     @isset($actions)
@@ -190,20 +192,21 @@
                 </div>
             </header>
 
-            <main class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
+            <main id="konten" tabindex="-1" class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
                 @if (session('status'))
                     <div
                         class="no-print mb-5 flex items-start gap-3 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800"
+                        role="status"
                         x-data="{ visible: true }"
                         x-show="visible"
                         x-transition
                     >
-                        <svg class="mt-0.5 h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <svg class="mt-0.5 h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
                         </svg>
                         <p class="flex-1">{{ session('status') }}</p>
-                        <button type="button" class="text-emerald-600 hover:text-emerald-900" @click="visible = false" aria-label="Tutup">
-                            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <button type="button" class="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg text-emerald-700 hover:bg-emerald-100" @click="visible = false" aria-label="Tutup">
+                            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
                             </svg>
                         </button>
@@ -211,9 +214,9 @@
                 @endif
 
                 @if ($errors->any())
-                    <div class="no-print mb-5 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800">
+                    <div class="no-print mb-5 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800" role="alert">
                         <div class="flex items-start gap-3">
-                            <svg class="mt-0.5 h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <svg class="mt-0.5 h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m0 3.75h.008v.008H12v-.008ZM21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
                             </svg>
                             <ul class="list-inside list-disc space-y-1">
@@ -227,7 +230,7 @@
 
                 {{ $slot }}
 
-                <footer class="no-print mt-10 flex flex-col items-center justify-between gap-2 border-t border-slate-200 pt-5 text-[11px] text-slate-400 sm:flex-row">
+                <footer class="no-print mt-10 flex flex-col items-center justify-between gap-2 border-t border-slate-200 pt-5 text-[11px] text-slate-600 sm:flex-row">
                     <p>Pantau · pemantauan ketersediaan website, port, dan layanan.</p>
                     <p>Data mentah disimpan {{ config('monitoring.retention_days') }} hari · rollup harian permanen</p>
                 </footer>

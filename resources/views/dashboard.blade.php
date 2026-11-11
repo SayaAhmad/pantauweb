@@ -1,7 +1,7 @@
 <x-app-layout title="Dashboard" subtitle="Ringkasan status semua monitor">
     <x-slot:actions>
-        <a href="{{ route('monitors.create') }}" class="btn-primary">
-            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <a href="{{ route('monitors.create') }}" class="btn-primary" aria-label="Tambah monitor">
+            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
             </svg>
             <span class="hidden sm:inline">Tambah monitor</span>
@@ -10,13 +10,13 @@
 
     <div class="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <form method="GET" action="{{ route('dashboard') }}" class="flex flex-wrap items-center gap-2">
-            <select name="type" class="input w-auto min-w-36 py-1.5 text-xs" onchange="this.form.submit()">
+            <select name="type" aria-label="Saring berdasarkan jenis monitor" class="input w-auto min-w-36 py-1.5 text-xs" onchange="this.form.submit()">
                 <option value="">Semua jenis</option>
                 @foreach (\App\Enums\MonitorType::cases() as $typeOption)
                     <option value="{{ $typeOption->value }}" @selected($type === $typeOption->value)>{{ $typeOption->label() }}</option>
                 @endforeach
             </select>
-            <select name="server" class="input w-auto min-w-40 py-1.5 text-xs" onchange="this.form.submit()">
+            <select name="server" aria-label="Saring berdasarkan server" class="input w-auto min-w-40 py-1.5 text-xs" onchange="this.form.submit()">
                 <option value="">Semua server</option>
                 @foreach ($servers as $server)
                     <option value="{{ $server->id }}" @selected((string) $serverId === (string) $server->id)>{{ $server->name }}</option>
@@ -33,9 +33,8 @@
     @if ($openIncidents->isNotEmpty())
         <div class="mb-5 overflow-hidden rounded-2xl border border-rose-200 bg-rose-50">
             <div class="flex items-center gap-2 border-b border-rose-200/70 px-4 py-2.5">
-                <span class="relative flex h-2 w-2">
-                    <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-rose-400 opacity-75"></span>
-                    <span class="relative inline-flex h-2 w-2 rounded-full bg-rose-500"></span>
+                <span class="flex h-2 w-2">
+                    <span class="h-2 w-2 rounded-full bg-rose-500"></span>
                 </span>
                 <p class="text-xs font-bold uppercase tracking-wide text-rose-700">Insiden berlangsung</p>
             </div>
@@ -45,11 +44,11 @@
                         <a href="{{ route('monitors.show', $incident->monitor) }}" class="flex flex-wrap items-center justify-between gap-2 px-4 py-3 transition hover:bg-rose-100/60">
                             <div class="min-w-0">
                                 <p class="truncate text-sm font-semibold text-rose-900">{{ $incident->monitor->name }}</p>
-                                <p class="mt-0.5 line-clamp-1 text-xs text-rose-700/80">{{ $incident->cause ?: 'Tidak ada detail penyebab' }}</p>
+                                <p class="mt-0.5 line-clamp-1 text-xs text-rose-700">{{ $incident->cause ?: 'Tidak ada detail penyebab' }}</p>
                             </div>
                             <div class="text-right text-xs text-rose-700">
                                 <p class="font-semibold">Berlangsung {{ \App\Support\Format::duration($incident->durationInSeconds()) }}</p>
-                                <p class="text-rose-600/80">sejak {{ \App\Support\Format::datetime($incident->started_at) }}</p>
+                                <p class="text-rose-700">sejak {{ \App\Support\Format::datetime($incident->started_at) }}</p>
                             </div>
                         </a>
                     </li>
@@ -94,7 +93,7 @@
                 <span class="badge bg-teal-50 text-teal-700 ring-teal-600/20">24 jam</span>
             </div>
             <div class="mt-4 h-64">
-                <canvas id="responseChart"></canvas>
+                <canvas id="responseChart" role="img" aria-label="Grafik waktu respons rata-rata per jam selama 24 jam terakhir"></canvas>
             </div>
         </div>
 
@@ -111,7 +110,7 @@
                 @if ($sslAlerts->isEmpty())
                     <div class="flex h-full min-h-32 flex-col items-center justify-center rounded-xl border border-dashed border-slate-200 bg-slate-50/60 px-4 text-center">
                         <p class="text-xs font-medium text-slate-500">Semua sertifikat aman</p>
-                        <p class="mt-0.5 text-[11px] text-slate-400">Tidak ada yang mendekati kedaluwarsa.</p>
+                        <p class="mt-0.5 text-[11px] text-slate-600">Tidak ada yang mendekati kedaluwarsa.</p>
                     </div>
                 @else
                     <ul class="space-y-2">
@@ -161,11 +160,11 @@
                     <table class="min-w-full divide-y divide-slate-200 text-sm">
                         <thead class="bg-slate-50/70">
                             <tr class="text-left text-[11px] font-semibold uppercase tracking-wide text-slate-500">
-                                <th class="px-4 py-2.5 sm:px-5">Monitor</th>
-                                <th class="px-4 py-2.5">Status</th>
-                                <th class="px-4 py-2.5 text-right">Uptime</th>
-                                <th class="px-4 py-2.5 text-right">Respons</th>
-                                <th class="px-4 py-2.5 text-right">Terakhir</th>
+                                <th scope="col" class="px-4 py-2.5 sm:px-5">Monitor</th>
+                                <th scope="col" class="px-4 py-2.5">Status</th>
+                                <th scope="col" class="px-4 py-2.5 text-right">Uptime</th>
+                                <th scope="col" class="px-4 py-2.5 text-right">Respons</th>
+                                <th scope="col" class="px-4 py-2.5 text-right">Terakhir</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-slate-100">
@@ -183,7 +182,7 @@
                                                 <span class="block truncate font-semibold text-slate-900 group-hover:text-teal-700">{{ $monitor->name }}</span>
                                                 <span class="block truncate text-[11px] text-slate-500">{{ \Illuminate\Support\Str::limit($monitor->target(), 46) }}</span>
                                                 @if ($monitor->server)
-                                                    <span class="block text-[11px] text-slate-400">{{ $monitor->server->name }}</span>
+                                                    <span class="block text-[11px] text-slate-600">{{ $monitor->server->name }}</span>
                                                 @endif
                                             </span>
                                         </a>

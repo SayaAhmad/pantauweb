@@ -3,7 +3,7 @@
         <a href="{{ route('servers.index') }}" class="btn-secondary">Kembali</a>
     </x-slot:actions>
 
-    <form method="POST" action="{{ route('servers.store') }}" class="mx-auto max-w-2xl">
+    <form method="POST" action="{{ route('servers.store') }}" class="mx-auto max-w-2xl" x-data="{ saving: false }" @submit="saving = true">
         @csrf
         @include('servers._form')
     </form>

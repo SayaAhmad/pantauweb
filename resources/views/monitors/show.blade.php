@@ -25,7 +25,7 @@
                 <x-type-badge :type="$monitor->type" />
                 <x-status-badge :status="$monitor->status" :pending="$pending" />
                 @unless ($monitor->is_active)
-                    <span class="badge bg-slate-100 text-slate-500 ring-slate-400/20">Nonaktif</span>
+                    <span class="badge bg-slate-100 text-slate-700 ring-slate-400/30">Nonaktif</span>
                 @endunless
             </div>
 
@@ -45,13 +45,13 @@
         </div>
 
         <div class="flex flex-wrap items-center gap-2">
-            <form method="POST" action="{{ route('monitors.check', $monitor) }}">
+            <form method="POST" action="{{ route('monitors.check', $monitor) }}" x-data="{ submitting: false }" @submit="submitting = true">
                 @csrf
-                <button type="submit" class="btn-secondary">
-                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <button type="submit" :disabled="submitting" class="btn-secondary">
+                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true" :class="submitting && 'animate-spin'">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />
                     </svg>
-                    Periksa sekarang
+                    <span x-text="submitting ? 'Memeriksa…' : 'Periksa sekarang'">Periksa sekarang</span>
                 </button>
             </form>
             <a href="{{ route('monitors.edit', $monitor) }}" class="btn-secondary">Ubah</a>
@@ -68,7 +68,7 @@
             <div class="flex flex-wrap items-start justify-between gap-3">
                 <div class="flex items-start gap-3">
                     <span class="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-rose-100 text-rose-600">
-                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m0 3.75h.008v.008H12v-.008ZM21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
                         </svg>
                     </span>
@@ -79,7 +79,7 @@
                 </div>
                 <div class="text-xs text-rose-700">
                     <p class="font-semibold">Sejak {{ \App\Support\Format::datetime($openIncident->started_at) }}</p>
-                    <p class="text-rose-600/80">Durasi {{ \App\Support\Format::duration($openIncident->durationInSeconds()) }}</p>
+                    <p class="text-rose-700">Durasi {{ \App\Support\Format::duration($openIncident->durationInSeconds()) }}</p>
                 </div>
             </div>
         </div>
@@ -113,20 +113,21 @@
                     @foreach (['24h' => '24 jam', '7d' => '7 hari', '30d' => '30 hari'] as $key => $label)
                         <a
                             href="{{ route('monitors.show', ['monitor' => $monitor, 'range' => $key]) }}"
-                            class="rounded-md px-2.5 py-1.5 transition {{ $range === $key ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-800' }}"
+                            @if ($range === $key) aria-current="page" @endif
+                            class="inline-flex min-h-11 items-center rounded-md px-3 py-1.5 transition {{ $range === $key ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-600 hover:text-slate-900' }}"
                         >{{ $label }}</a>
                     @endforeach
                 </div>
             </div>
 
             <div class="mt-4 h-56">
-                <canvas id="monitorResponseChart"></canvas>
+                <canvas id="monitorResponseChart" role="img" aria-label="Grafik waktu respons monitor untuk rentang {{ $rangeLabel }}"></canvas>
             </div>
 
             <div class="mt-4 border-t border-slate-100 pt-3">
                 <p class="text-[11px] font-semibold uppercase tracking-wide text-slate-500">Uptime per titik</p>
                 <div class="mt-2 h-28">
-                    <canvas id="monitorUptimeChart"></canvas>
+                    <canvas id="monitorUptimeChart" role="img" aria-label="Grafik uptime monitor per titik waktu untuk rentang {{ $rangeLabel }}"></canvas>
                 </div>
             </div>
         </div>
@@ -228,11 +229,11 @@
                     <table class="min-w-full divide-y divide-slate-200 text-xs">
                         <thead class="sticky top-0 bg-slate-50 text-left text-[10px] font-semibold uppercase tracking-wide text-slate-500">
                             <tr>
-                                <th class="px-4 py-2.5">Waktu</th>
-                                <th class="px-3 py-2.5">Status</th>
-                                <th class="px-3 py-2.5 text-right">HTTP</th>
-                                <th class="px-3 py-2.5 text-right">Respons</th>
-                                <th class="px-4 py-2.5">Keterangan</th>
+                                <th scope="col" class="px-4 py-2.5">Waktu</th>
+                                <th scope="col" class="px-3 py-2.5">Status</th>
+                                <th scope="col" class="px-3 py-2.5 text-right">HTTP</th>
+                                <th scope="col" class="px-3 py-2.5 text-right">Respons</th>
+                                <th scope="col" class="px-4 py-2.5">Keterangan</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-slate-100">
@@ -273,10 +274,10 @@
                     <table class="min-w-full divide-y divide-slate-200 text-xs">
                         <thead class="sticky top-0 bg-slate-50 text-left text-[10px] font-semibold uppercase tracking-wide text-slate-500">
                             <tr>
-                                <th class="px-4 py-2.5">Mulai</th>
-                                <th class="px-3 py-2.5">Pulih</th>
-                                <th class="px-3 py-2.5">Durasi</th>
-                                <th class="px-4 py-2.5">Penyebab</th>
+                                <th scope="col" class="px-4 py-2.5">Mulai</th>
+                                <th scope="col" class="px-3 py-2.5">Pulih</th>
+                                <th scope="col" class="px-3 py-2.5">Durasi</th>
+                                <th scope="col" class="px-4 py-2.5">Penyebab</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-slate-100">

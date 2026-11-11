@@ -11,7 +11,7 @@
 @endphp
 
 <span {{ $attributes->merge(['class' => 'inline-flex items-center gap-1.5 rounded-md bg-slate-100 px-2 py-1 text-[11px] font-semibold text-slate-600']) }}>
-    <svg class="h-3.5 w-3.5 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7">
+    <svg class="h-3.5 w-3.5 text-slate-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
         <path stroke-linecap="round" stroke-linejoin="round" d="{{ $icon }}" />
     </svg>
     {{ $value->label() }}

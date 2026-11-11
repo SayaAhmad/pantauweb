@@ -59,12 +59,12 @@
                 <table class="min-w-full divide-y divide-slate-200 text-sm">
                     <thead class="bg-slate-50/70">
                         <tr class="text-left text-[11px] font-semibold uppercase tracking-wide text-slate-500">
-                            <th class="px-4 py-3 sm:px-5">Monitor</th>
-                            <th class="px-4 py-3">Status</th>
-                            <th class="px-4 py-3">Mulai</th>
-                            <th class="px-4 py-3">Pulih</th>
-                            <th class="px-4 py-3 text-right">Durasi</th>
-                            <th class="px-4 py-3">Penyebab</th>
+                            <th scope="col" class="px-4 py-3 sm:px-5">Monitor</th>
+                            <th scope="col" class="px-4 py-3">Status</th>
+                            <th scope="col" class="px-4 py-3">Mulai</th>
+                            <th scope="col" class="px-4 py-3">Pulih</th>
+                            <th scope="col" class="px-4 py-3 text-right">Durasi</th>
+                            <th scope="col" class="px-4 py-3">Penyebab</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-100">
@@ -84,7 +84,7 @@
                                 <td class="whitespace-nowrap px-4 py-3">
                                     @if ($incident->isOpen())
                                         <span class="badge bg-rose-50 text-rose-700 ring-rose-600/20">
-                                            <span class="h-1.5 w-1.5 animate-pulse rounded-full bg-rose-500"></span>
+                                            <span class="h-1.5 w-1.5 rounded-full bg-rose-500"></span>
                                             Berlangsung
                                         </span>
                                     @else

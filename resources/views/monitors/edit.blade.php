@@ -3,7 +3,7 @@
         <a href="{{ route('monitors.show', $monitor) }}" class="btn-secondary">Batal</a>
     </x-slot:actions>
 
-    <form method="POST" action="{{ route('monitors.update', $monitor) }}" class="mx-auto max-w-3xl">
+    <form method="POST" action="{{ route('monitors.update', $monitor) }}" class="mx-auto max-w-3xl" x-data="{ saving: false }" @submit="saving = true">
         @csrf
         @method('PUT')
         @include('monitors._form')
