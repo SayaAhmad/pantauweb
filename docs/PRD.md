@@ -3,7 +3,7 @@
 **Versi:** 1.0 (MVP)
 **Tanggal:** 11 November 2026
 **Status:** Disetujui untuk implementasi MVP
-**Dokumen terkait:** [GLOSSARY.md](../GLOSSARY.md) · [ADR 0001–0006](adr/)
+**Dokumen terkait:** [GLOSSARY.md](../GLOSSARY.md) · [ADR 0001–0006](adr/) · [TASKS.md](TASKS.md)
 
 ---
 
