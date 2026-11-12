@@ -57,9 +57,12 @@ npm ci && npm run build
 cp .env.wasmer.example .env.wasmer   # isi APP_KEY, ADMIN_EMAIL, ADMIN_PASSWORD
 # sesuaikan owner, name, dan APP_URL di app.yaml
 wasmer deploy
-wasmer app secrets create --from-file=.env.wasmer
+php scripts/check-wasmer-env.php .env.wasmer
+wasmer app secret import --from-file=.env.wasmer
 wasmer deploy
 ```
+
+Jangan mengunggah `.env` lokal. File itu berisi `DB_*` Supabase, `APP_ENV=local`, dan `QUEUE_CONNECTION=database` yang akan menimpa konfigurasi Wasmer. `.env.wasmer` hanya boleh berisi `APP_KEY`, `ADMIN_EMAIL`, `ADMIN_PASSWORD`, dan opsional `MAIL_*`.
 
 Catatan: `QUEUE_CONNECTION` di Wasmer memakai `sync` karena Edge tidak menyediakan queue worker persisten. Pemeriksaan dijalankan oleh job `artisan monitors:dispatch` setiap menit, langsung dari Wasmer Jobs.
 

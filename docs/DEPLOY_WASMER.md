@@ -84,6 +84,30 @@ Tempel hasilnya ke `APP_KEY=` di `.env.wasmer`. Isi juga `ADMIN_EMAIL` dan `ADMI
 
 > `.env.wasmer` sudah masuk `.gitignore`. Jangan commit file ini.
 
+### Jangan memakai `.env` lokal
+
+`.env` di mesin Anda berisi konfigurasi development (Supabase/PostgreSQL, `APP_ENV=local`, `APP_DEBUG=true`, `QUEUE_CONNECTION=database`, `APP_URL=http://localhost`). Kalau file itu diunggah sebagai secrets, semuanya **menimpa** konfigurasi `app.yaml` dan variabel `DB_*` yang disuntikkan Wasmer. Akibatnya job `pantau-deploy` mencoba konek ke database lokal dan gagal.
+
+`Wasmer` hanya butuh tiga nilai wajib:
+
+| Secret | Wajib | Keterangan |
+|---|---|---|
+| `APP_KEY` | ya | `base64:` + 32 byte, dari `php artisan key:generate --show` |
+| `ADMIN_EMAIL` | ya | email login admin pertama |
+| `ADMIN_PASSWORD` | ya | minimal 12 karakter |
+
+Sisanya (`DB_*`, `APP_ENV`, `APP_DEBUG`, `APP_URL`, `SESSION_DRIVER`, `CACHE_STORE`, `QUEUE_CONNECTION`, `LOG_CHANNEL`, `FILESYSTEM_DISK`) sudah diatur di `app.yaml` atau disuntikkan Wasmer. Jangan menambahkannya ke `.env.wasmer`.
+
+Validasi file sebelum diimpor:
+
+```bash
+php scripts/check-wasmer-env.php .env.wasmer
+# atau
+composer wasmer:check
+```
+
+Script ini menolak `DB_*`, `APP_ENV`, `APP_DEBUG`, `APP_URL`, `QUEUE_CONNECTION`, dan variabel platform lain, lalu memeriksa format `APP_KEY` serta kredensial admin.
+
 ## 4. Sesuaikan `app.yaml`
 
 Buka `app.yaml` dan ganti:
@@ -117,7 +141,8 @@ Deploy pertama bisa menampilkan error 500 karena `APP_KEY` belum ada. Itu normal
 ## 6. Tambahkan secrets
 
 ```bash
-wasmer app secrets create --from-file=.env.wasmer
+php scripts/check-wasmer-env.php .env.wasmer
+wasmer app secret import --from-file=.env.wasmer
 ```
 
 Secret harus dibuat setelah app ada. Setelah secrets dibuat, deploy ulang agar job pasca-deploy berjalan dengan kredensial yang benar:
@@ -129,6 +154,63 @@ wasmer deploy
 Pada deploy kedua, job `pantau-deploy` menjalankan migrasi dan membuat akun admin dari `ADMIN_EMAIL` / `ADMIN_PASSWORD`.
 
 Alternatif: buat app lebih dulu lewat dashboard Wasmer, tambahkan secrets di **Settings → Environment Vars**, lalu jalankan `wasmer deploy` sekali.
+
+### Kalau sudah terlanjur mengunggah `.env`
+
+`wasmer app secret import` bersifat *upsert*: secret lama yang tidak ada di file baru **tidak dihapus**. Jadi kalau `.env` lokal sudah pernah diunggah, `DB_HOST`, `DB_CONNECTION`, `APP_ENV`, dan kawan-kawan masih tersimpan dan tetap menimpa Wasmer.
+
+Cara paling bersih: hapus semua secret, lalu impor ulang dari file yang sudah divalidasi.
+
+```bash
+wasmer app secret list
+php scripts/check-wasmer-env.php .env.wasmer
+wasmer app secret delete --all --force
+wasmer app secret import --from-file=.env.wasmer
+wasmer deploy
+```
+
+`--all --force` menghapus seluruh secret app, termasuk `APP_KEY`, jadi pastikan `.env.wasmer` sudah berisi `APP_KEY`, `ADMIN_EMAIL`, dan `ADMIN_PASSWORD` sebelum menjalankannya.
+
+Kalau ingin selektif, hapus satu per satu:
+
+```bash
+wasmer app secret delete DB_CONNECTION
+wasmer app secret delete DB_HOST
+wasmer app secret delete DB_PORT
+wasmer app secret delete DB_DATABASE
+wasmer app secret delete DB_USERNAME
+wasmer app secret delete DB_PASSWORD
+wasmer app secret delete DB_SSLMODE
+wasmer app secret delete APP_ENV
+wasmer app secret delete APP_DEBUG
+wasmer app secret delete APP_URL
+wasmer app secret delete SESSION_DRIVER
+wasmer app secret delete CACHE_STORE
+wasmer app secret delete QUEUE_CONNECTION
+wasmer app secret delete LOG_CHANNEL
+```
+
+Jika nilainya salah dan Anda tidak ingin menghapusnya, timpa dengan benar:
+
+```bash
+wasmer app secret update APP_KEY "<nilai base64:...>"
+```
+
+Setelah dibersihkan, deploy ulang:
+
+```bash
+wasmer deploy
+```
+
+Job `pantau-deploy` akan berjalan lagi. Migrasi memakai `migrate --force`, jadi aman diulang. Akun admin dibuat idempoten oleh `AdminSeeder`.
+
+Di log job, baris pertama `pantau-deploy` menampilkan konfigurasi efektif tanpa password, misalnya:
+
+```
+PHP 8.3.4 | APP_ENV=production | DB=mysql@<host-wasmer>/pantau | QUEUE=sync | CACHE=database
+```
+
+Kalau masih muncul `APP_ENV=local` atau `DB=pgsql@...supabase.com`, berarti secret lama belum terhapus. Job juga berhenti lebih awal dengan pesan yang menyebut variabel penyebabnya.
 
 ## 7. Verifikasi
 
@@ -200,6 +282,27 @@ Interval minimum Wasmer Jobs adalah 1 menit. Jam pada `trigger` mengikuti zona w
 
 Laravel membaca `DB_DATABASE`; Wasmer menyuntikkan `DB_NAME`. Jembatannya sudah ditambahkan di `config/database.php`.
 
+## Versi PHP
+
+Tiga hal ini harus konsisten:
+
+| Lapisan | Nilai | File |
+|---|---|---|
+| Runtime Wasmer | `php/php-eh` `8.3.404-beta.8` | `wasmer.toml` |
+| Platform Composer | `8.3.4` | `composer.json` → `config.platform.php` |
+| Cek runtime Composer | `PHP_VERSION_ID >= 80300` | `vendor/composer/platform_check.php` |
+
+`8.3.404-beta.8` adalah versi **paket** Wasmer; `PHP_VERSION` yang dilihat aplikasi adalah `8.3.4`. Karena itu `config.platform.php` diisi `8.3.4`, bukan `8.3.404`.
+
+Kalau `composer update` dilakukan dengan platform berbeda, Composer bisa menarik dependensi yang butuh PHP lebih baru. Cek ulang dengan:
+
+```bash
+composer prohibits php 8.3.4 --locked
+php -r "echo PHP_VERSION, PHP_EOL;"
+```
+
+Selama masih memakai `php/php-eh` 8.3, jangan menaikkan `config.platform.php` ke 8.4/8.5 dan jangan memakai Laravel/Symfony yang mewajibkan PHP 8.4+.
+
 ## Deploy ulang
 
 ```bash
@@ -211,11 +314,17 @@ Job `pantau-deploy` bersifat idempotent: migrasi yang sudah jalan dilewati, dan 
 
 ## Troubleshooting
 
+**Deploy/job `pantau-deploy` gagal setelah mengunggah `.env`**
+Gejalanya bisa berupa `SQLSTATE[08006]` (PostgreSQL/Supabase), `Access denied for user`, `Unknown database`, atau `Connection refused`. Penyebabnya secret lama dari `.env` menimpa `DB_*` milik Wasmer. Ikuti bagian [Kalau sudah terlanjur mengunggah `.env`](#kalau-sudah-terlanjur-mengunggah-env): cek `wasmer app secret list`, hapus `DB_*` dan `APP_ENV`/`APP_DEBUG`, lalu deploy ulang.
+
 **500 setelah deploy / "No application encryption key has been specified"**
-`APP_KEY` belum ada. Jalankan `wasmer app secrets create --from-file=.env.wasmer`, lalu deploy ulang.
+`APP_KEY` belum ada. Jalankan `wasmer app secret import --from-file=.env.wasmer`, lalu deploy ulang.
 
 **"could not find driver" atau koneksi database gagal**
 Pastikan `DB_CONNECTION=mysql` dan runtime memakai `php/php-eh`. Build `php/php` tidak memuat `pdo_mysql`, jadi Laravel akan gagal dengan `could not find driver`. Jangan hardcode host/port; pakai variabel `DB_*` dari Wasmer.
+
+**Job gagal dengan "Composer detected issues in your platform"**
+Runtime lebih tua dari platform pin. Samakan `wasmer.toml` dan `composer.json`. Lihat [Versi PHP](#versi-php).
 
 **`wasmer run .` panic di Windows**
 Pesan `not implemented: wasi::platform_clock_time_get(...ProcessCputimeId)` berasal dari host Windows Wasmer CLI, bukan dari aplikasi. Runtime `php/php-eh` belum bisa dijalankan lokal di Windows. Untuk uji lokal pakai `php artisan serve`; `wasmer deploy` tetap berjalan normal karena eksekusi terjadi di server Linux Wasmer.
