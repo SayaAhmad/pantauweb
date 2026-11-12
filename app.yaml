@@ -1,0 +1,106 @@
+kind: wasmer.io/App.v0
+# Ganti dengan username/organisasi Wasmer Anda.
+owner: your-wasmer-username
+name: pantau
+description: Pantau - pemantauan ketersediaan website, port, dan layanan server.
+package: .
+
+env:
+  APP_NAME: Pantau
+  APP_ENV: production
+  APP_DEBUG: "false"
+  APP_URL: https://pantau.wasmer.app
+  APP_LOCALE: id
+  APP_FALLBACK_LOCALE: en
+  APP_MAINTENANCE_DRIVER: cache
+  APP_MAINTENANCE_STORE: database
+
+  LOG_CHANNEL: stderr
+  LOG_LEVEL: warning
+
+  # Wasmer menyuntikkan DB_HOST, DB_PORT, DB_NAME, DB_USERNAME, dan DB_PASSWORD.
+  DB_CONNECTION: mysql
+
+  SESSION_DRIVER: database
+  SESSION_SECURE_COOKIE: "true"
+  CACHE_STORE: database
+  QUEUE_CONNECTION: sync
+
+  MAIL_MAILER: log
+  FILESYSTEM_DISK: local
+
+  ADMIN_NAME: Admin Pantau
+  MONITOR_DISPLAY_TIMEZONE: Asia/Jakarta
+  MONITOR_RETENTION_DAYS: "30"
+  MONITOR_SSL_WARNING_DAYS: "30"
+
+capabilities:
+  database:
+    engine: mysql
+  instaboot:
+    requests:
+      - path: /up
+
+volumes:
+  - name: storage
+    mount: /app/storage
+
+scaling:
+  mode: single_concurrency
+
+locality:
+  regions:
+    - fr-roub1
+
+health_checks:
+  - http:
+      method: get
+      path: /up
+      interval: 30s
+      timeout: 10s
+      unhealthy_threshold: 3
+      healthy_threshold: 1
+      expected_status_codes:
+        - 200
+
+jobs:
+  # Migrasi database + buat akun admin pertama setelah deploy.
+  - name: pantau-deploy
+    trigger: post-deployment
+    timeout: 5m
+    retries: 1
+    action:
+      execute:
+        command: artisan
+        cli_args:
+          - pantau:deploy
+
+  # Pengganti cron server. Perintah dipanggil langsung, tanpa schedule:run,
+  # karena runtime WASI tidak selalu bisa membuat proses PHP baru.
+  - name: pantau-dispatch
+    trigger: '* * * * *'
+    timeout: 5m
+    max_schedule_drift: 1m
+    action:
+      execute:
+        command: artisan
+        cli_args:
+          - monitors:dispatch
+
+  - name: pantau-rollup
+    trigger: '15 0 * * *'
+    timeout: 10m
+    action:
+      execute:
+        command: artisan
+        cli_args:
+          - monitors:rollup
+
+  - name: pantau-prune
+    trigger: '0 2 * * *'
+    timeout: 10m
+    action:
+      execute:
+        command: artisan
+        cli_args:
+          - monitors:prune

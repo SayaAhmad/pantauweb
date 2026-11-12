@@ -1,0 +1,10 @@
+{
+    "description": "Stub dipakai Laravel untuk mendeteksi namespace aplikasi di Wasmer. Samakan psr-4 dengan composer.json di root.",
+    "autoload": {
+        "psr-4": {
+            "App\\": "app/",
+            "Database\\Factories\\": "database/factories/",
+            "Database\\Seeders\\": "database/seeders/"
+        }
+    }
+}

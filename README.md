@@ -43,6 +43,26 @@ php artisan serve
 
 Buka `http://localhost:8000`. Akun default dari seeder: `admin@pantau.test` / `password` (ubah sebelum dipakai sungguhan).
 
+## Deploy ke Wasmer Edge
+
+Konfigurasi deploy sudah disiapkan di [`app.yaml`](app.yaml) dan [`wasmer.toml`](wasmer.toml): runtime `php/php-eh` 8.3.404-beta.8, MySQL terkelola, volume `/app/storage`, dan scheduler lewat Wasmer Jobs.
+
+Runtime `php/php` sengaja tidak dipakai: build itu tidak memuat `pdo_mysql` maupun `curl`, sehingga tidak bisa terhubung ke MySQL dan pemeriksaan HTTP kehilangan cURL.
+
+Panduan langkah demi langkah (termasuk secrets, migrasi otomatis, dan troubleshooting): [`docs/DEPLOY_WASMER.md`](docs/DEPLOY_WASMER.md).
+
+```bash
+composer install
+npm ci && npm run build
+cp .env.wasmer.example .env.wasmer   # isi APP_KEY, ADMIN_EMAIL, ADMIN_PASSWORD
+# sesuaikan owner, name, dan APP_URL di app.yaml
+wasmer deploy
+wasmer app secrets create --from-file=.env.wasmer
+wasmer deploy
+```
+
+Catatan: `QUEUE_CONNECTION` di Wasmer memakai `sync` karena Edge tidak menyediakan queue worker persisten. Pemeriksaan dijalankan oleh job `artisan monitors:dispatch` setiap menit, langsung dari Wasmer Jobs.
+
 ## Menjalankan pemeriksaan otomatis
 
 Pemeriksaan dijalankan oleh scheduler + queue worker. Untuk pengembangan, buka tiga terminal:
