@@ -196,6 +196,7 @@ Interval minimum Wasmer Jobs adalah 1 menit. Jam pada `trigger` mengikuti zona w
 | `LOG_CHANNEL` | `stderr` | Log muncul di dashboard Wasmer. |
 | `ADMIN_EMAIL` | secret | Akun admin pertama. |
 | `ADMIN_PASSWORD` | secret | Hanya dipakai saat akun belum ada; tidak mereset password lama. |
+| `GIT_SYNC_ENABLED` | `false` | Jangan aktifkan di Edge: runtime tidak punya kredensial git. |
 
 Laravel membaca `DB_DATABASE`; Wasmer menyuntikkan `DB_NAME`. Jembatannya sudah ditambahkan di `config/database.php`.
 

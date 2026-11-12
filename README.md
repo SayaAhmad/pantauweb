@@ -94,6 +94,29 @@ dan jalankan queue worker lewat supervisor/systemd.
 | `monitors:rollup --days=2` | Bangun rollup harian dari data mentah (dijadwalkan 00:15). |
 | `monitors:prune` | Hapus data mentah melewati retensi (dijadwalkan 02:00). |
 | `servers:agent-token {server}` | Terbitkan token agent untuk sebuah server. |
+| `pantau:git-sync` | Commit dan push perubahan ke `origin` (dijadwalkan bila `GIT_SYNC_ENABLED=true`). |
+
+### Sinkronisasi otomatis ke git
+
+Aktifkan di `.env` untuk membuat scheduler melakukan commit dan push berkala:
+
+```dotenv
+GIT_SYNC_ENABLED=true
+GIT_SYNC_INTERVAL_MINUTES=30
+```
+
+Jalankan scheduler (`php artisan schedule:work`) dan pastikan `git`, remote `origin`, serta kredensial push (SSH key atau token) sudah siap di mesin tersebut.
+
+Perintahnya juga bisa dipanggil manual:
+
+```bash
+php artisan pantau:git-sync                          # commit semua perubahan lalu push
+php artisan pantau:git-sync --message="fix: ..."     # pesan commit kustom
+php artisan pantau:git-sync --dry-run                # lihat perubahan saja
+php artisan pantau:git-sync --no-push                # commit tanpa push
+```
+
+Perintah ini tidak berjalan saat merge/rebase sedang berlangsung dan tidak menyentuh file yang diabaikan `.gitignore`. Jangan aktifkan di server produksi: riwayat commit sebaiknya tetap berasal dari mesin pengembang.
 
 Pemeriksaan bisa juga dijalankan manual dari UI ("Periksa sekarang") atau dari Tinker:
 

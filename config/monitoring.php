@@ -28,4 +28,18 @@ return [
     |--------------------------------------------------------------------------
     */
     'ssl_warning_days' => (int) env('MONITOR_SSL_WARNING_DAYS', 30),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Sinkronisasi otomatis ke git
+    |--------------------------------------------------------------------------
+    |
+    | Saat aktif, scheduler menjalankan `pantau:git-sync` untuk commit dan
+    | push perubahan ke remote origin. Biarkan nonaktif di server produksi.
+    |
+    */
+    'git_sync' => [
+        'enabled' => (bool) env('GIT_SYNC_ENABLED', false),
+        'interval_minutes' => (int) env('GIT_SYNC_INTERVAL_MINUTES', 30),
+    ],
 ];
