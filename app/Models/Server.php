@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\BelongsToUser;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -9,9 +10,10 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Server extends Model
 {
     /** @use HasFactory<\Database\Factories\ServerFactory> */
-    use HasFactory;
+    use BelongsToUser, HasFactory;
 
     protected $fillable = [
+        'user_id',
         'name',
         'hostname',
         'ip',

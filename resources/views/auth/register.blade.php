@@ -11,7 +11,7 @@
 
     <div class="rounded-2xl border border-slate-800 bg-slate-900/80 p-7 shadow-2xl backdrop-blur">
         @if ($errors->any())
-            <div class="mb-5 rounded-lg border border-rose-500/30 bg-rose-500/10 px-3.5 py-3 text-sm text-rose-200" role="alert">
+            <div id="form-errors" class="mb-5 rounded-lg border border-rose-500/30 bg-rose-500/10 px-3.5 py-3 text-sm text-rose-200" role="alert">
                 <ul class="list-inside list-disc space-y-1">
                     @foreach ($errors->all() as $error)
                         <li>{{ $error }}</li>
@@ -35,7 +35,8 @@
                     autofocus
                     autocomplete="name"
                     placeholder="Nama lengkap"
-                    class="min-h-11 w-full rounded-lg border border-slate-700 bg-slate-950/60 px-3 py-2.5 text-sm text-white outline-none transition placeholder:text-slate-400 focus:border-teal-400 focus:ring-2 focus:ring-teal-400"
+                    @error('name') aria-invalid="true" aria-describedby="form-errors" @enderror
+                    class="min-h-11 w-full rounded-lg border border-slate-700 bg-slate-950/60 px-3 py-2.5 text-base text-white outline-none transition placeholder:text-slate-400 focus:border-teal-400 focus:ring-2 focus:ring-teal-400 sm:text-sm"
                 >
             </div>
 
@@ -50,7 +51,8 @@
                     maxlength="255"
                     autocomplete="email"
                     placeholder="nama@example.com"
-                    class="min-h-11 w-full rounded-lg border border-slate-700 bg-slate-950/60 px-3 py-2.5 text-sm text-white outline-none transition placeholder:text-slate-400 focus:border-teal-400 focus:ring-2 focus:ring-teal-400"
+                    @error('email') aria-invalid="true" aria-describedby="form-errors" @enderror
+                    class="min-h-11 w-full rounded-lg border border-slate-700 bg-slate-950/60 px-3 py-2.5 text-base text-white outline-none transition placeholder:text-slate-400 focus:border-teal-400 focus:ring-2 focus:ring-teal-400 sm:text-sm"
                 >
             </div>
 
@@ -64,7 +66,8 @@
                     minlength="12"
                     autocomplete="new-password"
                     placeholder="Minimal 12 karakter"
-                    class="min-h-11 w-full rounded-lg border border-slate-700 bg-slate-950/60 px-3 py-2.5 text-sm text-white outline-none transition placeholder:text-slate-400 focus:border-teal-400 focus:ring-2 focus:ring-teal-400"
+                    @error('password') aria-invalid="true" aria-describedby="form-errors" @enderror
+                    class="min-h-11 w-full rounded-lg border border-slate-700 bg-slate-950/60 px-3 py-2.5 text-base text-white outline-none transition placeholder:text-slate-400 focus:border-teal-400 focus:ring-2 focus:ring-teal-400 sm:text-sm"
                 >
             </div>
 
@@ -78,7 +81,8 @@
                     minlength="12"
                     autocomplete="new-password"
                     placeholder="Ulangi kata sandi"
-                    class="min-h-11 w-full rounded-lg border border-slate-700 bg-slate-950/60 px-3 py-2.5 text-sm text-white outline-none transition placeholder:text-slate-400 focus:border-teal-400 focus:ring-2 focus:ring-teal-400"
+                    @error('password_confirmation') aria-invalid="true" aria-describedby="form-errors" @enderror
+                    class="min-h-11 w-full rounded-lg border border-slate-700 bg-slate-950/60 px-3 py-2.5 text-base text-white outline-none transition placeholder:text-slate-400 focus:border-teal-400 focus:ring-2 focus:ring-teal-400 sm:text-sm"
                 >
             </div>
 

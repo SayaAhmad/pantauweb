@@ -13,7 +13,7 @@ class ServerController extends Controller
     public function index(): View
     {
         return view('servers.index', [
-            'servers' => Server::query()->withCount('monitors')->orderBy('name')->get(),
+            'servers' => request()->user()->servers()->withCount('monitors')->orderBy('name')->get(),
         ]);
     }
 
@@ -24,7 +24,7 @@ class ServerController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
-        $server = Server::query()->create($this->validated($request));
+        $server = $request->user()->servers()->create($this->validated($request));
 
         return redirect()
             ->route('servers.index')
@@ -61,7 +61,14 @@ class ServerController extends Controller
     private function validated(Request $request, ?Server $server = null): array
     {
         $data = $request->validate([
-            'name' => ['required', 'string', 'max:120', Rule::unique('servers', 'name')->ignore($server?->id)],
+            'name' => [
+                'required',
+                'string',
+                'max:120',
+                Rule::unique('servers', 'name')
+                    ->where('user_id', $request->user()->id)
+                    ->ignore($server?->id),
+            ],
             'hostname' => ['required', 'string', 'max:255'],
             'ip' => ['nullable', 'ip'],
             'description' => ['nullable', 'string', 'max:500'],

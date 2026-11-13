@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\Incident;
 use App\Models\Monitor;
-use App\Models\Server;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\View\View;
@@ -26,6 +25,7 @@ class IncidentController extends Controller
 
         $incidents = Incident::query()
             ->with('monitor.server')
+            ->whereHas('monitor', fn ($query) => $query->ownedBy($request->user()))
             ->when($validated['server'] ?? null, fn ($query, $serverId) => $query->whereHas(
                 'monitor',
                 fn ($inner) => $inner->where('server_id', $serverId),
@@ -40,15 +40,19 @@ class IncidentController extends Controller
             ->withQueryString();
 
         $selectedMonitorIds = Monitor::query()
+            ->ownedBy($request->user())
             ->when($validated['server'] ?? null, fn ($query, $serverId) => $query->where('server_id', $serverId))
             ->orderBy('name')
             ->pluck('name', 'id');
 
         return view('incidents.index', [
             'incidents' => $incidents,
-            'servers' => Server::query()->orderBy('name')->get(),
+            'servers' => $request->user()->servers()->orderBy('name')->get(),
             'monitors' => $selectedMonitorIds,
-            'openCount' => Incident::query()->whereNull('resolved_at')->count(),
+            'openCount' => Incident::query()
+                ->whereNull('resolved_at')
+                ->whereHas('monitor', fn ($query) => $query->ownedBy($request->user()))
+                ->count(),
             'filters' => $validated,
         ]);
     }

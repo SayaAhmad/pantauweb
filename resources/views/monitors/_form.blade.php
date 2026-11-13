@@ -20,14 +20,14 @@
         <div class="space-y-4">
             <div>
                 <label for="name" class="label">Nama monitor</label>
-                <input id="name" name="name" type="text" value="{{ old('name', $monitor->name) }}" required maxlength="120" class="input" placeholder="Contoh: Website utama">
+                <input id="name" name="name" type="text" value="{{ old('name', $monitor->name) }}" required maxlength="120" class="input" placeholder="Contoh: Website utama" @error('name') aria-invalid="true" aria-describedby="name-error" @enderror>
                 <x-input-error for="name" />
             </div>
 
             <div class="grid gap-4 sm:grid-cols-2">
                 <div>
                     <label for="type" class="label">Jenis monitor</label>
-                    <select id="type" name="type" x-model="type" class="input">
+                    <select id="type" name="type" x-model="type" class="input" @error('type') aria-invalid="true" aria-describedby="type-error" @enderror>
                         @foreach (\App\Enums\MonitorType::cases() as $typeOption)
                             <option value="{{ $typeOption->value }}" @selected($typeValue === $typeOption->value)>{{ $typeOption->label() }}</option>
                         @endforeach
@@ -40,7 +40,7 @@
 
                 <div>
                     <label for="server_id" class="label">Server <span class="font-normal text-slate-500">(opsional)</span></label>
-                    <select id="server_id" name="server_id" class="input">
+                    <select id="server_id" name="server_id" class="input" @error('server_id') aria-invalid="true" aria-describedby="server_id-error" @enderror>
                         <option value="">Tanpa server</option>
                         @foreach ($servers as $server)
                             <option value="{{ $server->id }}" @selected((string) old('server_id', $monitor->server_id) === (string) $server->id)>{{ $server->name }}</option>
@@ -53,7 +53,7 @@
             <div x-show="type !== 'port'" x-cloak class="space-y-4">
                 <div>
                     <label for="url" class="label">URL</label>
-                    <input id="url" name="url" type="url" value="{{ old('url', $monitor->url) }}" class="input font-mono text-xs sm:text-sm" placeholder="https://example.com/health">
+                    <input id="url" name="url" type="url" value="{{ old('url', $monitor->url) }}" class="input font-mono text-xs sm:text-sm" placeholder="https://example.com/health" @error('url') aria-invalid="true" aria-describedby="url-error" @enderror>
                     <p class="hint">Harus diawali http:// atau https://.</p>
                     <x-input-error for="url" />
                 </div>
@@ -61,7 +61,7 @@
                 <div class="grid gap-4 sm:grid-cols-2">
                     <div>
                         <label for="method" class="label">Metode HTTP</label>
-                        <select id="method" name="method" class="input">
+                        <select id="method" name="method" class="input" @error('method') aria-invalid="true" aria-describedby="method-error" @enderror>
                             @foreach (['GET', 'HEAD'] as $method)
                                 <option value="{{ $method }}" @selected(old('method', $monitor->method ?: 'GET') === $method)>{{ $method }}</option>
                             @endforeach
@@ -70,14 +70,14 @@
                     </div>
                     <div>
                         <label for="expected_status" class="label">Kode status diharapkan</label>
-                        <input id="expected_status" name="expected_status" type="number" min="100" max="599" value="{{ old('expected_status', $monitor->expected_status) }}" class="input" placeholder="Kosong = 200–399">
+                        <input id="expected_status" name="expected_status" type="number" min="100" max="599" value="{{ old('expected_status', $monitor->expected_status) }}" class="input" placeholder="Kosong = 200–399" @error('expected_status') aria-invalid="true" aria-describedby="expected_status-error" @enderror>
                         <x-input-error for="expected_status" />
                     </div>
                 </div>
 
                 <div>
                     <label for="expected_keyword" class="label">Kata kunci pada respons <span class="font-normal text-slate-500">(opsional)</span></label>
-                    <input id="expected_keyword" name="expected_keyword" type="text" value="{{ old('expected_keyword', $monitor->expected_keyword) }}" class="input" placeholder="Contoh: OK atau &quot;status&quot;:&quot;healthy&quot;">
+                    <input id="expected_keyword" name="expected_keyword" type="text" value="{{ old('expected_keyword', $monitor->expected_keyword) }}" class="input" placeholder="Contoh: OK atau &quot;status&quot;:&quot;healthy&quot;" @error('expected_keyword') aria-invalid="true" aria-describedby="expected_keyword-error" @enderror>
                     <p class="hint">Pemeriksaan dinyatakan gagal bila kata kunci tidak ditemukan. Tidak berlaku untuk metode HEAD.</p>
                     <x-input-error for="expected_keyword" />
                 </div>
@@ -86,19 +86,19 @@
             <div x-show="type === 'port'" x-cloak class="grid gap-4 sm:grid-cols-2">
                 <div>
                     <label for="host" class="label">Host</label>
-                    <input id="host" name="host" type="text" value="{{ old('host', $monitor->host) }}" class="input font-mono text-xs sm:text-sm" placeholder="127.0.0.1 atau db.internal">
+                    <input id="host" name="host" type="text" value="{{ old('host', $monitor->host) }}" class="input font-mono text-xs sm:text-sm" placeholder="127.0.0.1 atau db.internal" @error('host') aria-invalid="true" aria-describedby="host-error" @enderror>
                     <x-input-error for="host" />
                 </div>
                 <div>
                     <label for="port" class="label">Port</label>
-                    <input id="port" name="port" type="number" min="1" max="65535" value="{{ old('port', $monitor->port) }}" class="input" placeholder="22, 80, 443, 5432">
+                    <input id="port" name="port" type="number" min="1" max="65535" value="{{ old('port', $monitor->port) }}" class="input" placeholder="22, 80, 443, 5432" @error('port') aria-invalid="true" aria-describedby="port-error" @enderror>
                     <x-input-error for="port" />
                 </div>
             </div>
 
             <div>
                 <label for="notes" class="label">Catatan <span class="font-normal text-slate-500">(opsional)</span></label>
-                <textarea id="notes" name="notes" rows="2" class="input" placeholder="Konteks tambahan, penanggung jawab, atau prosedur saat gangguan.">{{ old('notes', $monitor->notes) }}</textarea>
+                <textarea id="notes" name="notes" rows="2" class="input" placeholder="Konteks tambahan, penanggung jawab, atau prosedur saat gangguan." @error('notes') aria-invalid="true" aria-describedby="notes-error" @enderror>{{ old('notes', $monitor->notes) }}</textarea>
                 <x-input-error for="notes" />
             </div>
         </div>
@@ -122,7 +122,7 @@
                 <div>
                     <label for="interval_seconds" class="label">Interval pemeriksaan</label>
                     <div class="relative">
-                        <input id="interval_seconds" name="interval_seconds" type="number" min="60" max="86400" step="60" value="{{ old('interval_seconds', $monitor->interval_seconds ?? 300) }}" required class="input pr-14">
+                        <input id="interval_seconds" name="interval_seconds" type="number" min="60" max="86400" step="60" value="{{ old('interval_seconds', $monitor->interval_seconds ?? 300) }}" required class="input pr-14" @error('interval_seconds') aria-invalid="true" aria-describedby="interval_seconds-error" @enderror>
                         <span class="pointer-events-none absolute inset-y-0 right-3 flex items-center text-xs font-medium text-slate-500">detik</span>
                     </div>
                     <p class="hint">Minimal 60 detik. Contoh: 300 = tiap 5 menit.</p>
@@ -132,7 +132,7 @@
                 <div>
                     <label for="timeout_seconds" class="label">Batas waktu pemeriksaan</label>
                     <div class="relative">
-                        <input id="timeout_seconds" name="timeout_seconds" type="number" min="1" max="60" value="{{ old('timeout_seconds', $monitor->timeout_seconds ?? 10) }}" required class="input pr-14">
+                        <input id="timeout_seconds" name="timeout_seconds" type="number" min="1" max="60" value="{{ old('timeout_seconds', $monitor->timeout_seconds ?? 10) }}" required class="input pr-14" @error('timeout_seconds') aria-invalid="true" aria-describedby="timeout_seconds-error" @enderror>
                         <span class="pointer-events-none absolute inset-y-0 right-3 flex items-center text-xs font-medium text-slate-500">detik</span>
                     </div>
                     <p class="hint">Maksimal 60 detik.</p>
@@ -143,14 +143,14 @@
             <div class="grid gap-4 sm:grid-cols-2">
                 <div>
                     <label for="confirmation_threshold" class="label">Ambang konfirmasi gangguan</label>
-                    <input id="confirmation_threshold" name="confirmation_threshold" type="number" min="1" max="10" value="{{ old('confirmation_threshold', $monitor->confirmation_threshold ?? 2) }}" required class="input">
+                    <input id="confirmation_threshold" name="confirmation_threshold" type="number" min="1" max="10" value="{{ old('confirmation_threshold', $monitor->confirmation_threshold ?? 2) }}" required class="input" @error('confirmation_threshold') aria-invalid="true" aria-describedby="confirmation_threshold-error" @enderror>
                     <p class="hint">Jumlah kegagalan berturut-turut sebelum monitor dinyatakan gangguan.</p>
                     <x-input-error for="confirmation_threshold" />
                 </div>
 
                 <div>
                     <label for="recovery_threshold" class="label">Ambang pemulihan</label>
-                    <input id="recovery_threshold" name="recovery_threshold" type="number" min="1" max="10" value="{{ old('recovery_threshold', $monitor->recovery_threshold ?? 2) }}" required class="input">
+                    <input id="recovery_threshold" name="recovery_threshold" type="number" min="1" max="10" value="{{ old('recovery_threshold', $monitor->recovery_threshold ?? 2) }}" required class="input" @error('recovery_threshold') aria-invalid="true" aria-describedby="recovery_threshold-error" @enderror>
                     <p class="hint">Jumlah keberhasilan berturut-turut sebelum monitor dinyatakan normal kembali.</p>
                     <x-input-error for="recovery_threshold" />
                 </div>
@@ -159,7 +159,7 @@
             <div class="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
                 <input type="hidden" name="is_active" value="0">
                 <label class="flex cursor-pointer items-start gap-3">
-                    <input type="checkbox" name="is_active" value="1" class="mt-0.5 h-4 w-4 rounded border-slate-300 text-teal-700 focus:ring-teal-600" @checked($isActiveChecked)>
+                    <input type="checkbox" name="is_active" value="1" class="mt-0.5 h-4 w-4 rounded border-slate-300 text-teal-700 focus:ring-teal-600" @checked($isActiveChecked) @error('is_active') aria-invalid="true" aria-describedby="is_active-error" @enderror>
                     <span>
                         <span class="block text-sm font-semibold text-slate-800">Monitor aktif</span>
                         <span class="block text-xs text-slate-500">Monitor nonaktif berhenti dijadwalkan tetapi riwayatnya tetap tersimpan.</span>

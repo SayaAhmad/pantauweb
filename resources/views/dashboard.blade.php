@@ -9,23 +9,28 @@
     </x-slot:actions>
 
     <div class="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <form method="GET" action="{{ route('dashboard') }}" class="flex flex-wrap items-center gap-2">
-            <select name="type" aria-label="Saring berdasarkan jenis monitor" class="input w-auto min-w-36 py-1.5 text-xs" onchange="this.form.submit()">
-                <option value="">Semua jenis</option>
-                @foreach (\App\Enums\MonitorType::cases() as $typeOption)
-                    <option value="{{ $typeOption->value }}" @selected($type === $typeOption->value)>{{ $typeOption->label() }}</option>
-                @endforeach
-            </select>
-            <select name="server" aria-label="Saring berdasarkan server" class="input w-auto min-w-40 py-1.5 text-xs" onchange="this.form.submit()">
-                <option value="">Semua server</option>
-                @foreach ($servers as $server)
-                    <option value="{{ $server->id }}" @selected((string) $serverId === (string) $server->id)>{{ $server->name }}</option>
-                @endforeach
-            </select>
-            @if ($type || $serverId)
-                <a href="{{ route('dashboard') }}" class="btn-ghost py-1.5 text-xs">Reset</a>
-            @endif
-        </form>
+        <search>
+            <form method="GET" action="{{ route('dashboard') }}" class="flex flex-wrap items-center gap-2">
+                <label for="filter-type" class="sr-only">Jenis monitor</label>
+                <select id="filter-type" name="type" class="input w-auto min-w-36 py-1.5 sm:text-xs">
+                    <option value="">Semua jenis</option>
+                    @foreach (\App\Enums\MonitorType::cases() as $typeOption)
+                        <option value="{{ $typeOption->value }}" @selected($type === $typeOption->value)>{{ $typeOption->label() }}</option>
+                    @endforeach
+                </select>
+                <label for="filter-server" class="sr-only">Server</label>
+                <select id="filter-server" name="server" class="input w-auto min-w-40 py-1.5 sm:text-xs">
+                    <option value="">Semua server</option>
+                    @foreach ($servers as $server)
+                        <option value="{{ $server->id }}" @selected((string) $serverId === (string) $server->id)>{{ $server->name }}</option>
+                    @endforeach
+                </select>
+                <button type="submit" class="btn-secondary py-1.5 text-xs">Terapkan</button>
+                @if ($type || $serverId)
+                    <a href="{{ route('dashboard') }}" class="btn-ghost py-1.5 text-xs">Reset</a>
+                @endif
+            </form>
+        </search>
 
         <p class="text-xs text-slate-600">Diperbarui {{ now()->timezone(config('monitoring.display_timezone'))->translatedFormat('d M Y H:i') }}</p>
     </div>

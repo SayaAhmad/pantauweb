@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Enums\MonitorStatus;
 use App\Models\Incident;
 use App\Models\Monitor;
-use App\Models\Server;
+use App\Models\User;
 use App\Monitoring\Metrics;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -15,10 +15,16 @@ class DashboardController extends Controller
 {
     public function __invoke(Request $request): View
     {
+        $user = $request->user();
+
+        if ($user->is_admin) {
+            return $this->adminDashboard();
+        }
+
         $type = $request->query('type');
         $serverId = $request->query('server');
 
-        $monitors = Monitor::query()
+        $monitors = $user->monitors()
             ->with('server')
             ->when($type, fn ($query) => $query->where('type', $type))
             ->when($serverId, fn ($query) => $query->where('server_id', $serverId))
@@ -54,8 +60,7 @@ class DashboardController extends Controller
 
         $incidentBase = Incident::query()
             ->with('monitor')
-            ->when($serverId, fn ($query) => $query->whereHas('monitor', fn ($inner) => $inner->where('server_id', $serverId)))
-            ->when($type, fn ($query) => $query->whereHas('monitor', fn ($inner) => $inner->where('type', $type)));
+            ->whereIn('monitor_id', $monitorIds);
 
         $openIncidents = (clone $incidentBase)
             ->whereNull('resolved_at')
@@ -80,7 +85,7 @@ class DashboardController extends Controller
             'openIncidents' => $openIncidents,
             'recentIncidents' => $recentIncidents,
             'sslAlerts' => $sslAlerts,
-            'servers' => Server::query()->orderBy('name')->get(),
+            'servers' => $user->servers()->orderBy('name')->get(),
             'chart' => Metrics::seriesFromRows(
                 DB::table('check_results')
                     ->select('checked_at', 'status', 'response_time_ms')
@@ -94,6 +99,19 @@ class DashboardController extends Controller
             ),
             'type' => $type,
             'serverId' => $serverId,
+        ]);
+    }
+
+    private function adminDashboard(): View
+    {
+        $users = User::query()->orderBy('name')->get();
+
+        return view('admin.dashboard', [
+            'users' => $users,
+            'stats' => [
+                'users' => $users->count(),
+                'admins' => User::query()->where('is_admin', true)->count(),
+            ],
         ]);
     }
 }

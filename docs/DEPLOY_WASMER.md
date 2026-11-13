@@ -238,25 +238,48 @@ jobs:
     trigger: '* * * * *'
     action:
       execute:
-        command: artisan
-        cli_args: ["monitors:dispatch"]
+        command: php
+        cli_args: ["/app/artisan", "monitors:dispatch"]
+        env:
+          APP_ENV: production
+          DB_CONNECTION: mysql
+          QUEUE_CONNECTION: sync
+          # ...variabel lain dari blok env app.yaml
 
   - name: pantau-rollup
     trigger: '15 0 * * *'
     action:
       execute:
-        command: artisan
-        cli_args: ["monitors:rollup"]
+        command: php
+        cli_args: ["/app/artisan", "monitors:rollup"]
+        env: { ... }
 
   - name: pantau-prune
     trigger: '0 2 * * *'
     action:
       execute:
-        command: artisan
-        cli_args: ["monitors:prune"]
+        command: php
+        cli_args: ["/app/artisan", "monitors:prune"]
+        env: { ... }
 ```
 
 Perintah dipanggil langsung oleh Wasmer Jobs, bukan lewat `php artisan schedule:run`. Ini disengaja: `schedule:run` menjalankan perintah terjadwal sebagai proses PHP baru, sedangkan runtime WASI tidak selalu mendukung pembuatan proses seperti itu.
+
+Dua hal yang mudah salah dan membuat semua job gagal:
+
+1. **Paket hasil build GitHub tidak punya perintah `artisan`.** Paket hanya menyediakan `php` (dan `serve`). Karena itu job harus memanggil `php /app/artisan <perintah>`, bukan `command: artisan`.
+2. **Job tidak mewarisi `env:` tingkat atas `app.yaml`.** Job hanya mendapat secret (`APP_KEY`, `DB_*`, `ADMIN_*`). Tanpa `DB_CONNECTION: mysql` di `action.execute.env`, Laravel jatuh ke SQLite dan job gagal. Tulis ulang variabel yang dibutuhkan di setiap job.
+
+Secret lama juga menimpa `action.execute.env`. Jika job melaporkan `APP_ENV=local` atau `QUEUE_CONNECTION=database`, hapus secret sisa `.env`:
+
+```bash
+wasmer app secret delete --app <owner>/<app> APP_ENV
+wasmer app secret delete --app <owner>/<app> QUEUE_CONNECTION
+wasmer app secret delete --app <owner>/<app> APP_DEBUG
+wasmer app secret delete --app <owner>/<app> APP_URL
+```
+
+Cek riwayat job lewat GraphQL `getDeployApp { cronJobs { nodes { name invocations(first: 5) { nodes { status errorSummary logs { edges { node { message } } } } } } } }`. Pesan `Package does not contain command 'artisan'` berarti `command` masih salah.
 
 Karena queue `sync`, pemeriksaan monitor berjalan di dalam job `pantau-dispatch`. Job itu diberi timeout 5 menit. Jika monitor sangat banyak atau timeout pemeriksaan besar, naikkan `timeout` job dan/atau bagi monitor ke beberapa app.
 

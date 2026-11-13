@@ -19,4 +19,12 @@ window.pantauChart = function (canvasId, config) {
     return new window.Chart(canvas, config);
 };
 
+// Server-rendered validation errors: move focus to the first invalid field so
+// keyboard and screen reader users land on the problem instead of the page top.
+const firstInvalidField = document.querySelector('[aria-invalid="true"]');
+
+if (firstInvalidField) {
+    firstInvalidField.focus();
+}
+
 Alpine.start();

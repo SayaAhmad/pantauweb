@@ -27,15 +27,22 @@ Route::post('logout', [LoginController::class, 'destroy'])
 Route::middleware('auth')->group(function () {
     Route::get('/', DashboardController::class)->name('dashboard');
 
-    Route::post('monitors/{monitor}/check', [MonitorController::class, 'check'])->name('monitors.check');
-    Route::resource('monitors', MonitorController::class);
+    // Admin hanya mengelola dan memantau pengguna.
+    Route::middleware('admin')->group(function () {
+        Route::resource('users', UserController::class)->except(['show']);
+    });
 
-    Route::get('incidents', [IncidentController::class, 'index'])->name('incidents.index');
+    // Monitoring website hanya untuk pengguna biasa, dan setiap pengguna
+    // hanya melihat data miliknya sendiri.
+    Route::middleware('not_admin')->group(function () {
+        Route::post('monitors/{monitor}/check', [MonitorController::class, 'check'])->name('monitors.check');
+        Route::resource('monitors', MonitorController::class);
 
-    Route::get('reports', [ReportController::class, 'index'])->name('reports.index');
-    Route::get('reports/export', [ReportController::class, 'export'])->name('reports.export');
+        Route::get('incidents', [IncidentController::class, 'index'])->name('incidents.index');
 
-    Route::resource('servers', ServerController::class)->except(['show']);
+        Route::get('reports', [ReportController::class, 'index'])->name('reports.index');
+        Route::get('reports/export', [ReportController::class, 'export'])->name('reports.export');
 
-    Route::resource('users', UserController::class)->except(['show'])->middleware('admin');
+        Route::resource('servers', ServerController::class)->except(['show']);
+    });
 });

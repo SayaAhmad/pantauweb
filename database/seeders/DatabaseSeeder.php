@@ -2,8 +2,6 @@
 
 namespace Database\Seeders;
 
-use App\Models\Monitor;
-use App\Models\Server;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
@@ -21,7 +19,15 @@ class DatabaseSeeder extends Seeder
             ],
         );
 
-        $production = Server::query()->firstOrCreate(
+        $owner = User::query()->where('is_admin', false)->orderBy('id')->first();
+
+        if ($owner === null) {
+            $this->command?->warn('Tidak ada pengguna biasa. Data demo monitoring tidak dibuat.');
+
+            return;
+        }
+
+        $production = $owner->servers()->firstOrCreate(
             ['name' => 'Server Produksi'],
             [
                 'hostname' => 'prod-01.internal',
@@ -30,7 +36,7 @@ class DatabaseSeeder extends Seeder
             ],
         );
 
-        $staging = Server::query()->firstOrCreate(
+        $staging = $owner->servers()->firstOrCreate(
             ['name' => 'Server Staging'],
             [
                 'hostname' => 'staging-01.internal',
@@ -88,7 +94,7 @@ class DatabaseSeeder extends Seeder
         ];
 
         foreach ($monitors as $attributes) {
-            Monitor::query()->firstOrCreate(
+            $owner->monitors()->firstOrCreate(
                 ['name' => $attributes['name']],
                 $attributes,
             );

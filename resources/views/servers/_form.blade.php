@@ -3,26 +3,26 @@
         <div class="space-y-4">
             <div>
                 <label for="name" class="label">Nama server</label>
-                <input id="name" name="name" type="text" value="{{ old('name', $server->name) }}" required maxlength="120" class="input" placeholder="Contoh: Server Produksi">
+                <input id="name" name="name" type="text" value="{{ old('name', $server->name) }}" required maxlength="120" class="input" placeholder="Contoh: Server Produksi" @error('name') aria-invalid="true" aria-describedby="name-error" @enderror>
                 <x-input-error for="name" />
             </div>
 
             <div class="grid gap-4 sm:grid-cols-2">
                 <div>
                     <label for="hostname" class="label">Hostname</label>
-                    <input id="hostname" name="hostname" type="text" value="{{ old('hostname', $server->hostname) }}" required maxlength="255" class="input font-mono text-xs sm:text-sm" placeholder="prod-01.internal">
+                    <input id="hostname" name="hostname" type="text" value="{{ old('hostname', $server->hostname) }}" required maxlength="255" class="input font-mono text-xs sm:text-sm" placeholder="prod-01.internal" @error('hostname') aria-invalid="true" aria-describedby="hostname-error" @enderror>
                     <x-input-error for="hostname" />
                 </div>
                 <div>
                     <label for="ip" class="label">Alamat IP <span class="font-normal text-slate-500">(opsional)</span></label>
-                    <input id="ip" name="ip" type="text" value="{{ old('ip', $server->ip) }}" class="input font-mono text-xs sm:text-sm" placeholder="10.0.0.12">
+                    <input id="ip" name="ip" type="text" value="{{ old('ip', $server->ip) }}" class="input font-mono text-xs sm:text-sm" placeholder="10.0.0.12" @error('ip') aria-invalid="true" aria-describedby="ip-error" @enderror>
                     <x-input-error for="ip" />
                 </div>
             </div>
 
             <div>
                 <label for="description" class="label">Deskripsi <span class="font-normal text-slate-500">(opsional)</span></label>
-                <textarea id="description" name="description" rows="3" class="input" placeholder="Peran server, lokasi, atau penanggung jawab.">{{ old('description', $server->description) }}</textarea>
+                <textarea id="description" name="description" rows="3" class="input" placeholder="Peran server, lokasi, atau penanggung jawab." @error('description') aria-invalid="true" aria-describedby="description-error" @enderror>{{ old('description', $server->description) }}</textarea>
                 <x-input-error for="description" />
             </div>
         </div>

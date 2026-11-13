@@ -8,34 +8,39 @@
         </a>
     </x-slot:actions>
 
-    <form method="GET" action="{{ route('monitors.index') }}" class="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center">
-        <div class="relative flex-1">
-            <span class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-slate-500">
-                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
-                </svg>
-            </span>
-            <input type="search" name="q" value="{{ $search }}" placeholder="Cari nama, URL, atau host…" aria-label="Cari monitor berdasarkan nama, URL, atau host" class="input pl-9">
-        </div>
-        <select name="type" aria-label="Saring berdasarkan jenis monitor" class="input sm:w-44" onchange="this.form.submit()">
-            <option value="">Semua jenis</option>
-            @foreach (\App\Enums\MonitorType::cases() as $typeOption)
-                <option value="{{ $typeOption->value }}" @selected($type === $typeOption->value)>{{ $typeOption->label() }}</option>
-            @endforeach
-        </select>
-        <select name="server" aria-label="Saring berdasarkan server" class="input sm:w-48" onchange="this.form.submit()">
-            <option value="">Semua server</option>
-            @foreach ($servers as $server)
-                <option value="{{ $server->id }}" @selected((string) $serverId === (string) $server->id)>{{ $server->name }}</option>
-            @endforeach
-        </select>
-        <div class="flex gap-2">
-            <button type="submit" class="btn-secondary">Filter</button>
-            @if ($type || $serverId || $search !== '')
-                <a href="{{ route('monitors.index') }}" class="btn-ghost">Reset</a>
-            @endif
-        </div>
-    </form>
+    <search>
+        <form method="GET" action="{{ route('monitors.index') }}" class="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center">
+            <div class="relative flex-1">
+                <label for="q" class="sr-only">Cari monitor berdasarkan nama, URL, atau host</label>
+                <span class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-slate-500">
+                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+                    </svg>
+                </span>
+                <input type="search" id="q" name="q" value="{{ $search }}" placeholder="Cari nama, URL, atau host…" class="input pl-9">
+            </div>
+            <label for="filter-type" class="sr-only">Jenis monitor</label>
+            <select id="filter-type" name="type" class="input sm:w-44 sm:text-xs">
+                <option value="">Semua jenis</option>
+                @foreach (\App\Enums\MonitorType::cases() as $typeOption)
+                    <option value="{{ $typeOption->value }}" @selected($type === $typeOption->value)>{{ $typeOption->label() }}</option>
+                @endforeach
+            </select>
+            <label for="filter-server" class="sr-only">Server</label>
+            <select id="filter-server" name="server" class="input sm:w-48 sm:text-xs">
+                <option value="">Semua server</option>
+                @foreach ($servers as $server)
+                    <option value="{{ $server->id }}" @selected((string) $serverId === (string) $server->id)>{{ $server->name }}</option>
+                @endforeach
+            </select>
+            <div class="flex gap-2">
+                <button type="submit" class="btn-secondary">Filter</button>
+                @if ($type || $serverId || $search !== '')
+                    <a href="{{ route('monitors.index') }}" class="btn-ghost">Reset</a>
+                @endif
+            </div>
+        </form>
+    </search>
 
     <div class="card overflow-hidden">
         @if ($monitors->isEmpty())

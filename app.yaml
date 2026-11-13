@@ -9,7 +9,7 @@ env:
   APP_NAME: Pantau
   APP_ENV: production
   APP_DEBUG: "false"
-  APP_URL: https://pantau.wasmer.app
+  APP_URL: https://pantauweb.wasmer.app
   APP_LOCALE: id
   APP_FALLBACK_LOCALE: en
   APP_MAINTENANCE_DRIVER: cache
@@ -63,6 +63,12 @@ health_checks:
       expected_status_codes:
         - 200
 
+# Catatan penting soal job di Wasmer Edge:
+# - Paket hasil build GitHub hanya menyediakan perintah `php`, bukan `artisan`.
+#   Karena itu setiap job memanggil `php /app/artisan <perintah>`.
+# - Job tidak mewarisi `env:` di atas, jadi variabel yang dibutuhkan harus
+#   ditulis ulang di `action.execute.env`. Secret (APP_KEY, DB_*, ADMIN_*) tetap
+#   disuntikkan otomatis oleh Wasmer.
 jobs:
   # Migrasi database + buat akun admin pertama setelah deploy.
   - name: pantau-deploy
@@ -71,9 +77,32 @@ jobs:
     retries: 1
     action:
       execute:
-        command: artisan
+        command: php
         cli_args:
+          - /app/artisan
           - pantau:deploy
+        env:
+          APP_NAME: Pantau
+          APP_ENV: production
+          APP_DEBUG: "false"
+          APP_URL: https://pantauweb.wasmer.app
+          APP_LOCALE: id
+          APP_FALLBACK_LOCALE: en
+          APP_MAINTENANCE_DRIVER: cache
+          APP_MAINTENANCE_STORE: database
+          LOG_CHANNEL: stderr
+          LOG_LEVEL: warning
+          DB_CONNECTION: mysql
+          SESSION_DRIVER: database
+          SESSION_SECURE_COOKIE: "true"
+          CACHE_STORE: database
+          QUEUE_CONNECTION: sync
+          MAIL_MAILER: log
+          FILESYSTEM_DISK: local
+          ADMIN_NAME: Admin Pantau
+          MONITOR_DISPLAY_TIMEZONE: Asia/Jakarta
+          MONITOR_RETENTION_DAYS: "30"
+          MONITOR_SSL_WARNING_DAYS: "30"
 
   # Pengganti cron server. Perintah dipanggil langsung, tanpa schedule:run,
   # karena runtime WASI tidak selalu bisa membuat proses PHP baru.
@@ -83,24 +112,93 @@ jobs:
     max_schedule_drift: 1m
     action:
       execute:
-        command: artisan
+        command: php
         cli_args:
+          - /app/artisan
           - monitors:dispatch
+        env:
+          APP_NAME: Pantau
+          APP_ENV: production
+          APP_DEBUG: "false"
+          APP_URL: https://pantauweb.wasmer.app
+          APP_LOCALE: id
+          APP_FALLBACK_LOCALE: en
+          APP_MAINTENANCE_DRIVER: cache
+          APP_MAINTENANCE_STORE: database
+          LOG_CHANNEL: stderr
+          LOG_LEVEL: warning
+          DB_CONNECTION: mysql
+          SESSION_DRIVER: database
+          SESSION_SECURE_COOKIE: "true"
+          CACHE_STORE: database
+          QUEUE_CONNECTION: sync
+          MAIL_MAILER: log
+          FILESYSTEM_DISK: local
+          ADMIN_NAME: Admin Pantau
+          MONITOR_DISPLAY_TIMEZONE: Asia/Jakarta
+          MONITOR_RETENTION_DAYS: "30"
+          MONITOR_SSL_WARNING_DAYS: "30"
 
   - name: pantau-rollup
     trigger: '15 0 * * *'
     timeout: 10m
     action:
       execute:
-        command: artisan
+        command: php
         cli_args:
+          - /app/artisan
           - monitors:rollup
+        env:
+          APP_NAME: Pantau
+          APP_ENV: production
+          APP_DEBUG: "false"
+          APP_URL: https://pantauweb.wasmer.app
+          APP_LOCALE: id
+          APP_FALLBACK_LOCALE: en
+          APP_MAINTENANCE_DRIVER: cache
+          APP_MAINTENANCE_STORE: database
+          LOG_CHANNEL: stderr
+          LOG_LEVEL: warning
+          DB_CONNECTION: mysql
+          SESSION_DRIVER: database
+          SESSION_SECURE_COOKIE: "true"
+          CACHE_STORE: database
+          QUEUE_CONNECTION: sync
+          MAIL_MAILER: log
+          FILESYSTEM_DISK: local
+          ADMIN_NAME: Admin Pantau
+          MONITOR_DISPLAY_TIMEZONE: Asia/Jakarta
+          MONITOR_RETENTION_DAYS: "30"
+          MONITOR_SSL_WARNING_DAYS: "30"
 
   - name: pantau-prune
     trigger: '0 2 * * *'
     timeout: 10m
     action:
       execute:
-        command: artisan
+        command: php
         cli_args:
+          - /app/artisan
           - monitors:prune
+        env:
+          APP_NAME: Pantau
+          APP_ENV: production
+          APP_DEBUG: "false"
+          APP_URL: https://pantauweb.wasmer.app
+          APP_LOCALE: id
+          APP_FALLBACK_LOCALE: en
+          APP_MAINTENANCE_DRIVER: cache
+          APP_MAINTENANCE_STORE: database
+          LOG_CHANNEL: stderr
+          LOG_LEVEL: warning
+          DB_CONNECTION: mysql
+          SESSION_DRIVER: database
+          SESSION_SECURE_COOKIE: "true"
+          CACHE_STORE: database
+          QUEUE_CONNECTION: sync
+          MAIL_MAILER: log
+          FILESYSTEM_DISK: local
+          ADMIN_NAME: Admin Pantau
+          MONITOR_DISPLAY_TIMEZONE: Asia/Jakarta
+          MONITOR_RETENTION_DAYS: "30"
+          MONITOR_SSL_WARNING_DAYS: "30"

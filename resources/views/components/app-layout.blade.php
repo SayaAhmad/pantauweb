@@ -4,49 +4,59 @@
 ])
 
 @php
-    $navigation = [
-        [
-            'label' => 'Dashboard',
-            'route' => 'dashboard',
-            'pattern' => 'dashboard',
-            'icon' => 'home',
-        ],
-        [
-            'label' => 'Monitor',
-            'route' => 'monitors.index',
-            'pattern' => 'monitors.*',
-            'icon' => 'globe',
-        ],
-        [
-            'label' => 'Insiden',
-            'route' => 'incidents.index',
-            'pattern' => 'incidents.*',
-            'icon' => 'warning',
-        ],
-        [
-            'label' => 'Laporan',
-            'route' => 'reports.index',
-            'pattern' => 'reports.*',
-            'icon' => 'chart',
-        ],
-        [
-            'label' => 'Server',
-            'route' => 'servers.index',
-            'pattern' => 'servers.*',
-            'icon' => 'server',
-        ],
-    ];
-
-    if (auth()->user()?->is_admin) {
-        $navigation[] = [
-            'label' => 'Pengguna',
-            'route' => 'users.index',
-            'pattern' => 'users.*',
-            'icon' => 'users',
+    $isAdmin = auth()->user()?->is_admin ?? false;
+    $navigation = $isAdmin
+        ? [
+            [
+                'label' => 'Dashboard',
+                'route' => 'dashboard',
+                'pattern' => 'dashboard',
+                'icon' => 'home',
+            ],
+            [
+                'label' => 'Pengguna',
+                'route' => 'users.index',
+                'pattern' => 'users.*',
+                'icon' => 'users',
+            ],
+        ]
+        : [
+            [
+                'label' => 'Dashboard',
+                'route' => 'dashboard',
+                'pattern' => 'dashboard',
+                'icon' => 'home',
+            ],
+            [
+                'label' => 'Monitor',
+                'route' => 'monitors.index',
+                'pattern' => 'monitors.*',
+                'icon' => 'globe',
+            ],
+            [
+                'label' => 'Insiden',
+                'route' => 'incidents.index',
+                'pattern' => 'incidents.*',
+                'icon' => 'warning',
+            ],
+            [
+                'label' => 'Laporan',
+                'route' => 'reports.index',
+                'pattern' => 'reports.*',
+                'icon' => 'chart',
+            ],
+            [
+                'label' => 'Server',
+                'route' => 'servers.index',
+                'pattern' => 'servers.*',
+                'icon' => 'server',
+            ],
         ];
-    }
 
-    $openIncidents = \App\Models\Incident::query()->whereNull('resolved_at')->count();
+    $openIncidents = $isAdmin ? 0 : \App\Models\Incident::query()
+        ->whereNull('resolved_at')
+        ->whereHas('monitor', fn ($query) => $query->ownedBy(auth()->user()))
+        ->count();
 @endphp
 
 <!DOCTYPE html>
@@ -57,10 +67,35 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{{ $title }} · {{ config('app.name') }}</title>
     <link rel="preconnect" href="https://fonts.bunny.net">
-    <link href="https://fonts.bunny.net/css?family=plus-jakarta-sans:400,500,600,700,800" rel="stylesheet">
+    <link href="https://fonts.bunny.net/css?family=plus-jakarta-sans:400,500,600,700,800&display=swap" rel="stylesheet">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <noscript>
+        <style>
+            .app-sidebar {
+                position: static !important;
+                visibility: visible !important;
+                width: auto !important;
+                transform: none !important;
+            }
+        </style>
+    </noscript>
 </head>
-<body class="h-full" x-data="{ sidebarOpen: false }" @keydown.escape.window="sidebarOpen = false">
+<body
+    class="h-full"
+    x-data="{
+        sidebarOpen: false,
+        openSidebar() {
+            this.sidebarOpen = true;
+            this.$nextTick(() => this.$refs.sidebarClose?.focus());
+        },
+        closeSidebar() {
+            this.sidebarOpen = false;
+            this.$nextTick(() => this.$refs.sidebarTrigger?.focus());
+        },
+    }"
+    @keydown.escape.window="sidebarOpen && closeSidebar()"
+    @resize.window="window.innerWidth >= 1024 && (sidebarOpen = false)"
+>
     <a href="#konten" class="skip-link">Lewati ke konten</a>
     <div class="min-h-full">
         <div
@@ -68,13 +103,17 @@
             x-show="sidebarOpen"
             x-transition.opacity
             x-cloak
-            @click="sidebarOpen = false"
+            @click="closeSidebar()"
         ></div>
 
-        <aside
-            class="fixed inset-y-0 left-0 z-50 flex w-64 flex-col bg-slate-950 text-slate-300 transition-transform duration-200 lg:translate-x-0"
-            :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full invisible lg:visible'"
-            x-cloak
+        <div
+            id="sidebar"
+            x-ref="sidebar"
+            class="app-sidebar fixed inset-y-0 left-0 z-50 flex w-64 flex-col bg-slate-950 text-slate-300"
+            :data-open="sidebarOpen ? 'true' : 'false'"
+            :role="sidebarOpen ? 'dialog' : null"
+            :aria-modal="sidebarOpen ? 'true' : null"
+            :aria-label="sidebarOpen ? 'Menu navigasi' : null"
         >
             <div class="flex h-16 items-center justify-between px-5">
                 <a href="{{ route('dashboard') }}" class="flex items-center gap-2.5">
@@ -88,7 +127,7 @@
                         <span class="block text-[11px] font-medium uppercase tracking-widest text-slate-400">Monitoring</span>
                     </span>
                 </a>
-                <button type="button" class="flex h-11 w-11 items-center justify-center rounded-lg text-slate-400 hover:bg-slate-800 hover:text-white lg:hidden" @click="sidebarOpen = false">
+                <button type="button" x-ref="sidebarClose" class="flex h-11 w-11 items-center justify-center rounded-lg text-slate-400 hover:bg-slate-800 hover:text-white lg:hidden" @click="closeSidebar()">
                     <span class="sr-only">Tutup menu</span>
                     <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
@@ -171,12 +210,12 @@
                 </div>
                 <p class="mt-2 px-1 text-[10px] text-slate-400">Pantau MVP · {{ config('monitoring.display_timezone') }}</p>
             </div>
-        </aside>
+        </div>
 
-        <div class="lg:pl-64">
+        <div class="lg:pl-64" x-ref="content" x-effect="$refs.content.inert = sidebarOpen">
             <header class="sticky top-0 z-30 border-b border-slate-200 bg-white/90 backdrop-blur">
                 <div class="flex h-16 items-center gap-3 px-4 sm:px-6 lg:px-8">
-                    <button type="button" class="flex h-11 w-11 items-center justify-center rounded-lg text-slate-600 hover:bg-slate-100 hover:text-slate-900 lg:hidden" @click="sidebarOpen = true">
+                    <button type="button" x-ref="sidebarTrigger" aria-controls="sidebar" :aria-expanded="sidebarOpen ? 'true' : 'false'" class="flex h-11 w-11 items-center justify-center rounded-lg text-slate-600 hover:bg-slate-100 hover:text-slate-900 lg:hidden" @click="openSidebar()">
                         <span class="sr-only">Buka menu</span>
                         <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5M3.75 17.25h16.5" />

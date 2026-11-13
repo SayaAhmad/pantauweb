@@ -7,7 +7,6 @@ use App\Http\Requests\MonitorRequest;
 use App\Jobs\CheckMonitorJob;
 use App\Models\Incident;
 use App\Models\Monitor;
-use App\Models\Server;
 use App\Monitoring\Metrics;
 use App\Support\Format;
 use Illuminate\Http\RedirectResponse;
@@ -22,7 +21,7 @@ class MonitorController extends Controller
         $serverId = $request->query('server');
         $search = trim((string) $request->query('q'));
 
-        $monitors = Monitor::query()
+        $monitors = $request->user()->monitors()
             ->with('server')
             ->when($type, fn ($query) => $query->where('type', $type))
             ->when($serverId, fn ($query) => $query->where('server_id', $serverId))
@@ -53,7 +52,7 @@ class MonitorController extends Controller
 
         return view('monitors.index', [
             'monitors' => $monitors,
-            'servers' => Server::query()->orderBy('name')->get(),
+            'servers' => $request->user()->servers()->orderBy('name')->get(),
             'type' => $type,
             'serverId' => $serverId,
             'search' => $search,
@@ -72,13 +71,13 @@ class MonitorController extends Controller
                 'recovery_threshold' => 2,
                 'is_active' => true,
             ]),
-            'servers' => Server::query()->orderBy('name')->get(),
+            'servers' => request()->user()->servers()->orderBy('name')->get(),
         ]);
     }
 
     public function store(MonitorRequest $request): RedirectResponse
     {
-        $monitor = Monitor::query()->create([
+        $monitor = $request->user()->monitors()->create([
             ...$request->validated(),
             'status' => MonitorStatus::Unknown,
             'next_check_at' => now(),
@@ -136,7 +135,7 @@ class MonitorController extends Controller
     {
         return view('monitors.edit', [
             'monitor' => $monitor,
-            'servers' => Server::query()->orderBy('name')->get(),
+            'servers' => request()->user()->servers()->orderBy('name')->get(),
         ]);
     }
 

@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\Monitor;
-use App\Models\Server;
 use App\Monitoring\Metrics;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
@@ -107,6 +106,7 @@ class ReportController extends Controller
         $monitorId = $validated['monitor'] ?? null;
 
         $monitors = Monitor::query()
+            ->ownedBy($request->user())
             ->with('server')
             ->when($serverId, fn ($query) => $query->where('server_id', $serverId))
             ->when($monitorId, fn ($query) => $query->whereKey($monitorId))
@@ -161,9 +161,9 @@ class ReportController extends Controller
             ];
         });
 
-        $serverOptions = Server::query()->orderBy('name')->get();
+        $serverOptions = $request->user()->servers()->orderBy('name')->get();
 
-        $monitorOptions = Monitor::query()
+        $monitorOptions = $request->user()->monitors()
             ->when($serverId, fn ($query) => $query->where('server_id', $serverId))
             ->orderBy('name')
             ->pluck('name', 'id');

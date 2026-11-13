@@ -51,7 +51,11 @@ class MonitorRequest extends FormRequest
         return [
             'name' => ['required', 'string', 'max:120'],
             'type' => ['required', Rule::enum(MonitorType::class)],
-            'server_id' => ['nullable', 'integer', Rule::exists('servers', 'id')],
+            'server_id' => [
+                'nullable',
+                'integer',
+                Rule::exists('servers', 'id')->where(fn ($query) => $query->where('user_id', $this->user()->id)),
+            ],
             'url' => [Rule::requiredIf($needsUrl), 'nullable', 'url:http,https', 'max:2048'],
             'host' => [Rule::requiredIf($isPort), 'nullable', 'string', 'max:255'],
             'port' => [Rule::requiredIf($isPort), 'nullable', 'integer', 'between:1,65535'],
