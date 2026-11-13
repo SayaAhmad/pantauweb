@@ -24,8 +24,13 @@ class AdminSeeder extends Seeder
             [
                 'name' => env('ADMIN_NAME', 'Admin Pantau'),
                 'password' => Hash::make($password),
+                'is_admin' => true,
             ],
         );
+
+        if (! $user->is_admin) {
+            $user->update(['is_admin' => true]);
+        }
 
         $this->command?->info(
             $user->wasRecentlyCreated

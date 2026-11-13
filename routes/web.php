@@ -1,16 +1,23 @@
 <?php
 
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\IncidentController;
 use App\Http\Controllers\MonitorController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\ServerController;
+use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('guest')->group(function () {
     Route::get('login', [LoginController::class, 'create'])->name('login');
     Route::post('login', [LoginController::class, 'store'])->name('login.store');
+
+    Route::get('register', [RegisterController::class, 'create'])->name('register');
+    Route::post('register', [RegisterController::class, 'store'])
+        ->middleware('throttle:6,1')
+        ->name('register.store');
 });
 
 Route::post('logout', [LoginController::class, 'destroy'])
@@ -29,4 +36,6 @@ Route::middleware('auth')->group(function () {
     Route::get('reports/export', [ReportController::class, 'export'])->name('reports.export');
 
     Route::resource('servers', ServerController::class)->except(['show']);
+
+    Route::resource('users', UserController::class)->except(['show'])->middleware('admin');
 });

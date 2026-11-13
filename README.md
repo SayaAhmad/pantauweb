@@ -10,6 +10,7 @@ Aplikasi pemantauan ketersediaan **website**, **port**, dan **layanan server** y
 - Dashboard, grafik waktu respons & uptime, laporan yang dapat difilter, ekspor CSV, dan tampilan cetak.
 - Retensi data mentah 30 hari + rollup harian permanen.
 - Notifikasi in-app dan email opsional.
+- Login dengan registrasi publik; akun baru menjadi pengguna biasa, dan admin dapat mengelola akun lewat menu Pengguna.
 
 Dokumen produk: [`docs/PRD.md`](docs/PRD.md) · Glosarium: [`GLOSSARY.md`](GLOSSARY.md) · Keputusan arsitektur: [`docs/adr/`](docs/adr/) · Tracker tugas: [`docs/TASKS.md`](docs/TASKS.md) · Panduan produksi: [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md).
 

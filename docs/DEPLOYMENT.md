@@ -351,10 +351,10 @@ Bila `.env` berubah, jalankan `php artisan optimize` ulang agar konfigurasi ter-
 ## 11. Keamanan
 
 - Wajib HTTPS. Cookie sesi Laravel otomatis memakai `Secure` bila `APP_URL` memakai `https`.
-- Satu akun admin, tanpa registrasi dan tanpa peran tambahan. Ganti kata sandi default sebelum aplikasi dapat diakses publik.
+- Registrasi publik aktif di `/register`; akun baru otomatis berperan sebagai pengguna biasa dan langsung bisa masuk. Admin dapat menambah, mengubah, menghapus, dan mengganti kata sandi akun lewat menu **Pengguna**, serta menaikkan peran menjadi admin. Admin tidak bisa menghapus akunnya sendiri atau mencabut peran admin dari akunnya sendiri. Ganti kata sandi default sebelum aplikasi dapat diakses publik.
 - `APP_DEBUG=false`, `APP_ENV=production`.
 - Batasi akses panel dengan firewall bila hanya dipakai dari jaringan internal, misalnya `allow 10.0.0.0/8; deny all;` pada blok `location /`.
-- Rate limit login sudah aktif (5 percobaan per menit per email dan IP).
+- Rate limit login aktif (5 percobaan per menit per email dan IP) dan registrasi dibatasi 6 percobaan per menit per IP.
 - Jangan menaruh `.env`, `database/`, atau `storage/` di dalam document root. Document root harus `public/`.
 - Periksa pembaruan dependensi secara berkala dengan `composer audit` dan `npm audit`.
 

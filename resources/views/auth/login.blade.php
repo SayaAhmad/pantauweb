@@ -46,7 +46,7 @@
                     type="password"
                     required
                     autocomplete="current-password"
-                    placeholder="••••••••"
+                    placeholder="Kata sandi"
                     class="min-h-11 w-full rounded-lg border border-slate-700 bg-slate-950/60 px-3 py-2.5 text-sm text-white outline-none transition placeholder:text-slate-400 focus:border-teal-400 focus:ring-2 focus:ring-teal-400"
                 >
             </div>
@@ -60,6 +60,11 @@
                 Masuk
             </button>
         </form>
+
+        <p class="mt-5 text-center text-sm text-slate-400">
+            Belum punya akun?
+            <a href="{{ route('register') }}" class="font-semibold text-teal-400 hover:text-teal-300">Buat akun</a>
+        </p>
 
         @if (app()->environment('local'))
             <div class="mt-6 rounded-lg border border-slate-800 bg-slate-950/50 px-3.5 py-3 text-xs text-slate-400">

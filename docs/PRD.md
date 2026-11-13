@@ -11,7 +11,7 @@
 
 Pantau adalah aplikasi web self-hosted untuk memantau ketersediaan website, port, dan layanan server dari satu dashboard. Aplikasi menjalankan pemeriksaan eksternal secara berkala, mencatat waktu respons dan kode status HTTP, memantau masa berlaku sertifikat SSL, serta menyajikan riwayat insiden, uptime, dan laporan yang dapat difilter.
 
-MVP ditujukan untuk satu organisasi dengan satu instalasi dan satu akun admin. Fokus MVP adalah **ketersediaan dari sudut pandang eksternal**, bukan metrik internal mesin.
+MVP ditujukan untuk satu organisasi dengan satu instalasi. Registrasi publik tersedia; akun baru otomatis berperan sebagai pengguna biasa, sedangkan admin mengelola akun lewat menu **Pengguna**. Fokus MVP adalah **ketersediaan dari sudut pandang eksternal**, bukan metrik internal mesin.
 
 ### Tujuan MVP
 
@@ -21,7 +21,7 @@ MVP ditujukan untuk satu organisasi dengan satu instalasi dan satu akun admin. F
 
 ### Non-tujuan MVP
 
-- Multi-tenant, registrasi publik, billing, dan peran pengguna berlapis.
+- Multi-tenant, billing, dan peran pengguna berlapis.
 - Metrik internal server (CPU, RAM, disk, status proses) di antarmuka — ditunda ke Fase 2.
 - Notifikasi Slack/Telegram/webhook, eskalasi, on-call, dan status page publik.
 - Pemeriksaan dari banyak lokasi (distributed probing) dan SLA kontraktual.
