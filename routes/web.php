@@ -18,6 +18,9 @@ Route::middleware('guest')->group(function () {
     Route::post('register', [RegisterController::class, 'store'])
         ->middleware('throttle:6,1')
         ->name('register.store');
+
+    Route::get('auth/google', [App\Http\Controllers\Auth\SocialiteController::class, 'redirectToProvider'])->name('auth.google');
+    Route::get('auth/google/callback', [App\Http\Controllers\Auth\SocialiteController::class, 'handleProviderCallback'])->name('auth.google.callback');
 });
 
 Route::post('logout', [LoginController::class, 'destroy'])
