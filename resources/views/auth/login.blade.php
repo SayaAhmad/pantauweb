@@ -1,59 +1,27 @@
 <x-guest-layout title="Masuk">
-    <style>
-        @keyframes pulse-path {
-            0% { stroke-dashoffset: 80; }
-            50% { stroke-dashoffset: 0; }
-            100% { stroke-dashoffset: -80; }
-        }
-        @keyframes float {
-            0%, 100% { transform: translateY(0) rotate(0deg); }
-            50% { transform: translateY(-8px) rotate(2deg); }
-        }
-        @keyframes shimmer {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-        .ecg-path {
-            stroke-dasharray: 80;
-            animation: pulse-path 3.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-        }
-        .animated-gradient-btn {
-            background-size: 200% 200%;
-            animation: shimmer 5s ease infinite;
-        }
-        .float-logo {
-            animation: float 6s ease-in-out infinite;
-        }
-        .title-shimmer {
-            background-size: 200% 100%;
-            animation: shimmer 4s linear infinite;
-        }
-    </style>
-
+    <!-- Clean login form - no background animations -->
+    <div class="relative z-10">
     <div class="mb-6 flex flex-col items-center text-center">
         <!-- Live status indicator badge -->
-        <div class="mb-4 inline-flex items-center gap-2 rounded-full border border-teal-500/30 bg-teal-950/50 px-3.5 py-1 text-xs font-medium text-teal-300 shadow-[0_0_20px_rgba(20,184,166,0.2)] backdrop-blur-md">
+        <div class="mb-4 inline-flex items-center gap-2 rounded-full border border-teal-500/30 bg-teal-950/60 px-3.5 py-1 text-xs font-medium text-teal-300 shadow-sm backdrop-blur-md">
             <span class="relative flex h-2 w-2">
-                <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-teal-400 opacity-75"></span>
                 <span class="relative inline-flex h-2 w-2 rounded-full bg-teal-400"></span>
             </span>
             Sistem Pemantauan Online
         </div>
 
-        <!-- Logo with animated glow ring and gradient -->
-        <div class="float-logo relative flex items-center justify-center">
-            <span class="absolute -inset-2 animate-pulse rounded-2xl bg-gradient-to-r from-teal-500 via-cyan-400 to-emerald-400 opacity-50 blur-lg"></span>
-            <span class="relative flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-slate-900 via-teal-950 to-slate-900 ring-1 ring-inset ring-teal-400/60 shadow-2xl shadow-teal-950">
-                <svg class="h-8 w-8 text-teal-300 drop-shadow-[0_0_10px_rgba(45,212,191,0.7)]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true">
-                    <path class="ecg-path" stroke-linecap="round" stroke-linejoin="round" d="M3.75 12h3l2.25-6 3.75 12 2.25-6h5.25" />
+        <!-- Clean logo without chaotic wobble -->
+        <div class="relative flex items-center justify-center">
+            <span class="relative flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-900 border border-teal-500/40 shadow-xl shadow-teal-950/50">
+                <svg class="h-7 w-7 text-teal-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 12h3l2.25-6 3.75 12 2.25-6h5.25" />
                 </svg>
             </span>
         </div>
-        <h1 class="mt-4 text-3xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-white via-teal-100 to-emerald-300 title-shimmer">
+        <h1 class="mt-4 text-2xl font-bold tracking-tight text-white">
             Pantau
         </h1>
-        <p class="mt-1.5 text-sm text-slate-400">Masuk untuk memantau website, port, dan layanan.</p>
+        <p class="mt-1 text-sm text-slate-400">Masuk untuk memantau website, port, dan layanan.</p>
     </div>
 
     <!-- Gradient border wrapper for glassmorphism card -->
@@ -117,7 +85,7 @@
 
                 <button
                     type="submit"
-                    class="animated-gradient-btn group relative min-h-11 w-full overflow-hidden rounded-xl bg-gradient-to-r from-teal-500 via-emerald-400 to-cyan-500 px-4 py-2.5 text-sm font-semibold text-slate-950 shadow-[0_0_25px_rgba(20,184,166,0.35)] transition-all duration-300 hover:shadow-[0_0_35px_rgba(20,184,166,0.55)] hover:-translate-y-0.5 active:translate-y-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-300 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900"
+                    class="group relative min-h-11 w-full overflow-hidden rounded-xl bg-gradient-to-r from-teal-500 via-emerald-400 to-cyan-500 px-4 py-2.5 text-sm font-semibold text-slate-950 shadow-sm transition-all duration-300 hover:shadow-[0_0_35px_rgba(20,184,166,0.55)] hover:-translate-y-0.5 active:translate-y-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-300 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900"
                 >
                     <span class="relative z-10 flex items-center justify-center gap-2 font-bold tracking-wide">
                         Masuk
@@ -126,6 +94,28 @@
                         </svg>
                     </span>
                 </button>
+
+                <div class="relative my-4">
+                    <div class="absolute inset-0 flex items-center" aria-hidden="true">
+                        <div class="w-full border-t border-slate-700/80"></div>
+                    </div>
+                    <div class="relative flex justify-center text-xs uppercase">
+                        <span class="bg-slate-900 px-2 text-slate-400">Atau masuk dengan</span>
+                    </div>
+                </div>
+
+                <a
+                    href="{{ route('auth.google') }}"
+                    class="flex min-h-11 w-full items-center justify-center gap-3 rounded-xl border border-slate-700 bg-slate-950/70 px-4 py-2.5 text-sm font-semibold text-slate-200 shadow-sm transition duration-200 hover:border-slate-600 hover:bg-slate-800/80 focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-400"
+                >
+                    <svg class="h-5 w-5" viewBox="0 0 24 24" aria-hidden="true">
+                        <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17Z"/>
+                        <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.33 24 12 24Z"/>
+                        <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.18 0 9.99 0 12s.45 3.82 1.25 5.42l4.03-3.15Z"/>
+                        <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98Z"/>
+                    </svg>
+                    <span>Masuk dengan Google</span>
+                </a>
             </form>
 
             <p class="mt-5 text-center text-sm text-slate-400">
@@ -150,4 +140,5 @@
     </div>
 
     <p class="mt-6 text-center text-[11px] text-slate-500 tracking-wider uppercase font-medium">Satu instalasi untuk satu organisasi · MVP</p>
+    </div>
 </x-guest-layout>
