@@ -9,6 +9,7 @@
         "php": "^8.3",
         "laravel/boost": "^2.10",
         "laravel/framework": "^13.0",
+        "laravel/socialite": "*",
         "laravel/tinker": "^3.0"
     },
     "require-dev": {
