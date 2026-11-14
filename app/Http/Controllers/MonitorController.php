@@ -59,7 +59,7 @@ class MonitorController extends Controller
         ]);
     }
 
-    public function create(): View
+    public function create(Request $request): View
     {
         return view('monitors.create', [
             'monitor' => new Monitor([
@@ -71,7 +71,7 @@ class MonitorController extends Controller
                 'recovery_threshold' => 2,
                 'is_active' => true,
             ]),
-            'servers' => request()->user()->servers()->orderBy('name')->get(),
+            'servers' => $request->user()->servers()->orderBy('name')->get(),
         ]);
     }
 
@@ -131,11 +131,11 @@ class MonitorController extends Controller
         ]);
     }
 
-    public function edit(Monitor $monitor): View
+    public function edit(Request $request, Monitor $monitor): View
     {
         return view('monitors.edit', [
             'monitor' => $monitor,
-            'servers' => request()->user()->servers()->orderBy('name')->get(),
+            'servers' => $request->user()->servers()->orderBy('name')->get(),
         ]);
     }
 

@@ -17,15 +17,15 @@ class ReportTest extends TestCase
     public function test_report_filters_by_server_and_exports_csv(): void
     {
         $user = User::factory()->create();
-        $server = Server::factory()->create(['name' => 'Server Uji']);
-        $otherServer = Server::factory()->create(['name' => 'Server Lain']);
+        $server = Server::factory()->for($user)->create(['name' => 'Server Uji']);
+        $otherServer = Server::factory()->for($user)->create(['name' => 'Server Lain']);
 
-        $monitor = Monitor::factory()->create([
+        $monitor = Monitor::factory()->for($user)->create([
             'name' => 'Website Laporan',
             'server_id' => $server->id,
         ]);
 
-        $otherMonitor = Monitor::factory()->create([
+        $otherMonitor = Monitor::factory()->for($user)->create([
             'name' => 'Website Diabaikan',
             'server_id' => $otherServer->id,
         ]);
@@ -57,7 +57,7 @@ class ReportTest extends TestCase
     public function test_incident_page_renders_with_filters(): void
     {
         $user = User::factory()->create();
-        $monitor = Monitor::factory()->create(['name' => 'Monitor Insiden']);
+        $monitor = Monitor::factory()->for($user)->create(['name' => 'Monitor Insiden']);
 
         \App\Models\Incident::factory()->for($monitor)->open()->create([
             'started_at' => now()->subMinutes(15),

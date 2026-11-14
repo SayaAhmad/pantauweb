@@ -7,6 +7,7 @@ use App\Models\Incident;
 use App\Models\Monitor;
 use App\Models\User;
 use App\Monitoring\Metrics;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
@@ -104,13 +105,27 @@ class DashboardController extends Controller
 
     private function adminDashboard(): View
     {
-        $users = User::query()->orderBy('name')->get();
+        $users = User::query()
+            ->where('is_admin', false)
+            ->withCount([
+                'monitors',
+                'servers',
+                'monitors as down_monitors_count' => fn (Builder $query) => $query->where('status', MonitorStatus::Down),
+                'incidents as open_incidents_count' => fn (Builder $query) => $query->whereNull('resolved_at'),
+            ])
+            ->withMax('monitors', 'last_checked_at')
+            ->orderBy('name')
+            ->get();
 
         return view('admin.dashboard', [
             'users' => $users,
             'stats' => [
                 'users' => $users->count(),
                 'admins' => User::query()->where('is_admin', true)->count(),
+                'monitors' => (int) $users->sum('monitors_count'),
+                'down' => (int) $users->sum('down_monitors_count'),
+                'open_incidents' => (int) $users->sum('open_incidents_count'),
+                'without_monitors' => $users->where('monitors_count', 0)->count(),
             ],
         ]);
     }

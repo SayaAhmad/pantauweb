@@ -12,6 +12,7 @@ class ServerFactory extends Factory
     public function definition(): array
     {
         return [
+            'user_id' => \App\Models\User::factory(),
             'name' => fake()->unique()->company(),
             'hostname' => 'srv-'.fake()->unique()->numerify('####').'.internal',
             'ip' => fake()->localIpv4(),

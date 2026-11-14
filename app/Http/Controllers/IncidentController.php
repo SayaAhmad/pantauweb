@@ -4,14 +4,17 @@ namespace App\Http\Controllers;
 
 use App\Models\Incident;
 use App\Models\Monitor;
+use App\Models\Server;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
 class IncidentController extends Controller
 {
     public function index(Request $request): View
     {
+        $user = $request->user();
         $validated = $request->validate([
             'server' => ['nullable', 'integer'],
             'monitor' => ['nullable', 'integer'],
@@ -23,9 +26,11 @@ class IncidentController extends Controller
         $from = isset($validated['from']) ? Carbon::parse($validated['from'])->startOfDay() : null;
         $to = isset($validated['to']) ? Carbon::parse($validated['to'])->endOfDay() : null;
 
+        $monitorIds = $user->monitors()->pluck('id');
+
         $incidents = Incident::query()
             ->with('monitor.server')
-            ->whereHas('monitor', fn ($query) => $query->ownedBy($request->user()))
+            ->whereIn('monitor_id', $monitorIds)
             ->when($validated['server'] ?? null, fn ($query, $serverId) => $query->whereHas(
                 'monitor',
                 fn ($inner) => $inner->where('server_id', $serverId),
@@ -40,18 +45,18 @@ class IncidentController extends Controller
             ->withQueryString();
 
         $selectedMonitorIds = Monitor::query()
-            ->ownedBy($request->user())
+            ->whereIn('id', $monitorIds)
             ->when($validated['server'] ?? null, fn ($query, $serverId) => $query->where('server_id', $serverId))
             ->orderBy('name')
             ->pluck('name', 'id');
 
         return view('incidents.index', [
             'incidents' => $incidents,
-            'servers' => $request->user()->servers()->orderBy('name')->get(),
+            'servers' => $user->servers()->orderBy('name')->get(),
             'monitors' => $selectedMonitorIds,
             'openCount' => Incident::query()
+                ->whereIn('monitor_id', $monitorIds)
                 ->whereNull('resolved_at')
-                ->whereHas('monitor', fn ($query) => $query->ownedBy($request->user()))
                 ->count(),
             'filters' => $validated,
         ]);

@@ -4,29 +4,20 @@
 ])
 
 @php
-    $isAdmin = auth()->user()?->is_admin ?? false;
-    $navigation = $isAdmin
-        ? [
-            [
-                'label' => 'Dashboard',
-                'route' => 'dashboard',
-                'pattern' => 'dashboard',
-                'icon' => 'home',
-            ],
-            [
-                'label' => 'Pengguna',
-                'route' => 'users.index',
-                'pattern' => 'users.*',
-                'icon' => 'users',
-            ],
-        ]
-        : [
-            [
-                'label' => 'Dashboard',
-                'route' => 'dashboard',
-                'pattern' => 'dashboard',
-                'icon' => 'home',
-            ],
+    $isAdmin = auth()->user()?->is_admin;
+
+    $navigation = [
+        [
+            'label' => 'Dashboard',
+            'route' => 'dashboard',
+            'pattern' => 'dashboard',
+            'icon' => 'home',
+        ],
+    ];
+
+    // Pengguna biasa: akses ke monitor, server, insiden, laporan
+    if (! $isAdmin) {
+        $navigation = array_merge($navigation, [
             [
                 'label' => 'Monitor',
                 'route' => 'monitors.index',
@@ -51,12 +42,28 @@
                 'pattern' => 'servers.*',
                 'icon' => 'server',
             ],
+        ]);
+    }
+
+    // Admin: akses ke pengguna
+    if ($isAdmin) {
+        $navigation[] = [
+            'label' => 'Pengguna',
+            'route' => 'users.index',
+            'pattern' => 'users.*',
+            'icon' => 'users',
         ];
 
-    $openIncidents = $isAdmin ? 0 : \App\Models\Incident::query()
-        ->whereNull('resolved_at')
-        ->whereHas('monitor', fn ($query) => $query->ownedBy(auth()->user()))
-        ->count();
+        $openIncidents = \App\Models\Incident::query()
+            ->whereHas('monitor', fn ($query) => $query->whereIn('user_id', \App\Models\User::where('is_admin', false)->pluck('id')))
+            ->whereNull('resolved_at')
+            ->count();
+    } else {
+        $openIncidents = \App\Models\Incident::query()
+            ->whereNull('resolved_at')
+            ->whereHas('monitor', fn ($query) => $query->ownedBy(auth()->user()))
+            ->count();
+    }
 @endphp
 
 <!DOCTYPE html>
@@ -127,7 +134,7 @@
                         <span class="block text-[11px] font-medium uppercase tracking-widest text-slate-400">Monitoring</span>
                     </span>
                 </a>
-                <button type="button" x-ref="sidebarClose" class="flex h-11 w-11 items-center justify-center rounded-lg text-slate-400 hover:bg-slate-800 hover:text-white lg:hidden" @click="closeSidebar()">
+                <button type="button" x-ref="sidebarClose" class="flex h-11 w-11 items-center justify-center rounded-lg text-slate-400 hover:bg-slate-900 hover:text-white lg:hidden" @click="closeSidebar()">
                     <span class="sr-only">Tutup menu</span>
                     <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
@@ -149,7 +156,7 @@
                             @switch($item['icon'])
                                 @case('home')
                                     <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="m2.25 12 8.954-8.955a1.125 1.125 0 0 1 1.592 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 12h3l2.25-6 3.75 12 2.25-6h5.25" />
                                     </svg>
                                     @break
                                 @case('globe')
@@ -159,7 +166,7 @@
                                     @break
                                 @case('warning')
                                     <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.008v.008H12v-.008Z" />
                                     </svg>
                                     @break
                                 @case('chart')
@@ -208,7 +215,7 @@
                         </button>
                     </form>
                 </div>
-                <p class="mt-2 px-1 text-[10px] text-slate-400">Pantau MVP · {{ config('monitoring.display_timezone') }}</p>
+                <p class="mt-2 px-1 text-[11px] text-slate-300">Pantau MVP · {{ config('monitoring.display_timezone') }}</p>
             </div>
         </div>
 
@@ -290,5 +297,8 @@
             </main>
         </div>
     </div>
+<!-- impeccable-live-start -->
+<script src="http://localhost:8400/live.js?token=81dbe076-5e1d-482d-b434-09cae60fd8a3"></script>
+<!-- impeccable-live-end -->
 </body>
 </html>

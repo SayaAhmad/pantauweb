@@ -10,10 +10,10 @@ use Illuminate\View\View;
 
 class ServerController extends Controller
 {
-    public function index(): View
+    public function index(Request $request): View
     {
         return view('servers.index', [
-            'servers' => request()->user()->servers()->withCount('monitors')->orderBy('name')->get(),
+            'servers' => $request->user()->servers()->withCount('monitors')->orderBy('name')->get(),
         ]);
     }
 

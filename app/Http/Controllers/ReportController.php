@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Monitor;
+use App\Models\Server;
 use App\Monitoring\Metrics;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
@@ -79,6 +80,7 @@ class ReportController extends Controller
      */
     private function reportData(Request $request): array
     {
+        $user = $request->user();
         $validated = $request->validate([
             'server' => ['nullable', 'integer'],
             'monitor' => ['nullable', 'integer'],
@@ -105,15 +107,17 @@ class ReportController extends Controller
         $serverId = $validated['server'] ?? null;
         $monitorId = $validated['monitor'] ?? null;
 
-        $monitors = Monitor::query()
-            ->ownedBy($request->user())
+        $monitorIds = $user->monitors()
+            ->when($serverId, fn ($query) => $query->where('server_id', $serverId))
+            ->when($monitorId, fn ($query) => $query->whereKey($monitorId))
+            ->pluck('id');
+
+        $monitors = $user->monitors()
             ->with('server')
             ->when($serverId, fn ($query) => $query->where('server_id', $serverId))
             ->when($monitorId, fn ($query) => $query->whereKey($monitorId))
             ->orderBy('name')
             ->get();
-
-        $monitorIds = $monitors->pluck('id')->all();
 
         $retentionStart = now()->subDays((int) config('monitoring.retention_days'))->startOfDay();
         $rawFrom = $from->greaterThan($retentionStart) ? $from->copy() : $retentionStart->copy();
@@ -161,9 +165,10 @@ class ReportController extends Controller
             ];
         });
 
-        $serverOptions = $request->user()->servers()->orderBy('name')->get();
+        $serverOptions = Server::query()->whereIn('id', $user->servers()->pluck('id'))->orderBy('name')->get();
 
-        $monitorOptions = $request->user()->monitors()
+        $monitorOptions = Monitor::query()
+            ->whereIn('id', $monitorIds)
             ->when($serverId, fn ($query) => $query->where('server_id', $serverId))
             ->orderBy('name')
             ->pluck('name', 'id');

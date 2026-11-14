@@ -19,5 +19,8 @@
     <div class="relative w-full max-w-sm">
         {{ $slot }}
     </div>
+<!-- impeccable-live-start -->
+<script src="http://localhost:8400/live.js?token=81dbe076-5e1d-482d-b434-09cae60fd8a3"></script>
+<!-- impeccable-live-end -->
 </body>
 </html>

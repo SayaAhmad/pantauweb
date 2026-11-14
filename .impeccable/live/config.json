@@ -1,0 +1,9 @@
+{
+  "files": [
+    "resources/views/components/app-layout.blade.php",
+    "resources/views/components/guest-layout.blade.php"
+  ],
+  "insertBefore": "</body>",
+  "commentSyntax": "html",
+  "cspChecked": true
+}

@@ -15,6 +15,7 @@ class MonitorFactory extends Factory
     public function definition(): array
     {
         return [
+            'user_id' => \App\Models\User::factory(),
             'server_id' => null,
             'name' => Str::title(fake()->unique()->words(2, true)),
             'type' => MonitorType::Http,
